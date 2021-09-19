@@ -36,6 +36,12 @@ public:
     ~SettingsEntryArray() = default;
 
     //----------------------------------------------------------------------------------------------
+    [[nodiscard]] constexpr size_t size() const
+    {
+        return SettingsCount;
+    }
+
+    //----------------------------------------------------------------------------------------------
     constexpr bool doesSettingExist(std::string_view name) const
     {
         for (auto &entry : entryArray)
