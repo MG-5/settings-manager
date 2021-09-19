@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "SettingsUser.hpp"
 #include "SpecialAssert.hpp"
 
 #include <stdexcept>
@@ -8,15 +7,6 @@
 
 namespace settings
 {
-enum class Unit : uint8_t
-{
-    NoUnit = 0,
-    Angle,
-    Acceleration,
-    Velocity,
-    Percentage
-};
-
 using SettingsValue_t = float;
 
 class SettingsEntry
@@ -25,13 +15,11 @@ public:
     const SettingsValue_t minValue;
     const SettingsValue_t defaultValue;
     const SettingsValue_t maxValue;
-    const Unit unit;
     const std::string_view name;
 
     constexpr SettingsEntry(const SettingsValue_t min, const SettingsValue_t defaultValue,
-                            const SettingsValue_t max, const Unit unit,
-                            std::string_view name) noexcept
-        : minValue{min}, defaultValue{defaultValue}, maxValue{max}, unit{unit}, name{name}
+                            const SettingsValue_t max, std::string_view name) noexcept
+        : minValue{min}, defaultValue{defaultValue}, maxValue{max}, name{name}
     {
         // if these checks are triggered at compile time you will get errors which say that
         // std::abort is not a constexpr function
@@ -46,6 +34,7 @@ public:
         if (defaultValue < minValue)
             std::abort(); // default value is smaller than min value
     }
+
     constexpr bool operator==(const SettingsEntry &other) const
     {
         return name.compare(other.name) == 0;

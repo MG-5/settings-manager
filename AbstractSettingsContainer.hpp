@@ -28,10 +28,17 @@ public:
     }
 
     //----------------------------------------------------------------------------------------------
-
-    SettingsValue_t getValue(std::string_view name) const
+    template <typename T = SettingsValue_t>
+    T getValue(std::string_view name) const
     {
-        return containerArray[entryArray.getIndex(name)].second;
+        auto i = entryArray.getIndex(name);
+        auto value = containerArray[i].second;
+
+        if constexpr (std::is_same<T, SettingsValue_t>::value)
+            return value;
+
+        else
+            return static_cast<T>(value);
     }
 
     //----------------------------------------------------------------------------------------------
