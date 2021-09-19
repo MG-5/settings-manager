@@ -1,93 +1,77 @@
 #pragma once
 
-#include "SettingsEntry.hpp"
+#include "SettingsEntryArray.hpp"
 #include "SettingsUser.hpp"
-
-#include <array>
-#include <cstdlib>
 
 namespace settings
 {
 
-template <size_t SettingsCount>
+template <size_t SettingsCount, const SettingsEntryArray<SettingsCount> &entryArray>
 class AbstractSettingsContainer
 {
 public:
-    using SettingsArray_t = std::array<SettingsEntry, SettingsCount>;
+    using ContainerArray = std::array<std::pair<std::string_view, SettingsValue_t>, SettingsCount>;
 
-    AbstractSettingsContainer(SettingsArray_t settingsArray) : settingsArray(settingsArray)
+    AbstractSettingsContainer()
     {
-        // check for duplicates
-        for (auto &i : settingsArray)
+        for (size_t i = 0; i < SettingsCount; i++)
         {
-            for (auto &j : settingsArray)
-            {
-                if (std::addressof(i) == std::addressof(j))
-                {
-                    continue;
-                }
-                specialAssert(i != j);
-            }
+            containerArray[i].first = entryArray[i].name;
+            containerArray[i].second = entryArray[i].defaultValue;
         }
-    }
-
-    ~AbstractSettingsContainer() = default;
+    };
 
     //----------------------------------------------------------------------------------------------
-    bool doesSettingExist(const char *name) const
+    [[nodiscard]] size_t size() const
     {
-        for (auto &entry : settingsArray)
+        return SettingsCount;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    SettingsValue_t getValue(std::string_view name) const
+    {
+        return containerArray[entryArray.getIndex(name)].second;
+    }
+
+    //----------------------------------------------------------------------------------------------
+    bool setValue(std::string_view name, const float newValue, const bool notify = true)
+    {
+        const auto Index = entryArray.getIndex(name);
+        const auto MaxValue = entryArray[Index].maxValue;
+        const auto MinValue = entryArray[Index].minValue;
+
+        if (newValue > MaxValue || newValue < MinValue)
         {
-            if (entry.hasSameName(name))
-            {
-                return true;
-            }
+            return false;
         }
-        return false;
-    }
 
-    //----------------------------------------------------------------------------------------------
-    const SettingsEntry &get(const char *name)
-    {
-        return getNonConst(name);
-    }
+        containerArray[Index].second = newValue;
 
-    //----------------------------------------------------------------------------------------------
-    bool set(const char *name, const float newValue, const bool notify = true)
-    {
-        return getNonConst(name).set(newValue, notify);
+        if (notify)
+            SettingsUser::notifySettingsUpdate();
+
+        return true;
     }
 
     //----------------------------------------------------------------------------------------------
     void resetAllToDefault()
     {
-        for (uint8_t i = 0; i < settingsArray.size(); ++i)
+        for (size_t i = 0; i < SettingsCount; ++i)
         {
-            // only notify on last parameter to avoid spam
-            settingsArray[i].set(settingsArray[i].defaultValue, i == settingsArray.size() - 1);
+            containerArray[i].second = entryArray[i].defaultValue;
         }
+        SettingsUser::notifySettingsUpdate();
     }
 
     //----------------------------------------------------------------------------------------------
-    const SettingsArray_t &getAllSettings() const
+    constexpr const SettingsEntryArray<SettingsCount> &getAllSettings() const
     {
-        return settingsArray;
+        return entryArray;
     }
 
 private:
-    SettingsArray_t settingsArray;
-    SettingsEntry &getNonConst(const char *name)
-    {
-        for (auto &entry : settingsArray)
-        {
-            if (entry.hasSameName(name))
-            {
-                return entry;
-            }
-        }
-        specialAssert(false);
-        return settingsArray[0];
-    }
+    ContainerArray containerArray{};
 };
 
 } // namespace settings

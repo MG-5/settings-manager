@@ -1,9 +1,10 @@
 #pragma once
 
-#include "SettingsUser.hpp"
+//#include "SettingsUser.hpp"
 #include "SpecialAssert.hpp"
 
-#include <cstring>
+#include <stdexcept>
+#include <string_view>
 
 namespace settings
 {
@@ -20,23 +21,44 @@ using SettingsValue_t = float;
 
 class SettingsEntry
 {
-    SettingsValue_t value;
-
 public:
     const SettingsValue_t minValue;
     const SettingsValue_t defaultValue;
     const SettingsValue_t maxValue;
     const Unit unit;
-    const char *name;
+    const std::string_view name;
 
-    SettingsEntry(const SettingsValue_t min, const SettingsValue_t defaultValue,
-                  const SettingsValue_t max, const Unit unit, const char *name);
+    constexpr SettingsEntry(const SettingsValue_t min, const SettingsValue_t defaultValue,
+                            const SettingsValue_t max, const Unit unit,
+                            std::string_view name) noexcept
+        : minValue{min}, defaultValue{defaultValue}, maxValue{max}, unit{unit}, name{name}
+    {
+        // if these checks are triggered at compile time you will get errors which say that
+        // std::abort is not a constexpr function
+        // to get rid this errors make sure your min, default and max values are correct ;)
 
-    bool set(SettingsValue_t rawValue, bool notify);
-    SettingsValue_t get() const;
+        if (minValue > maxValue)
+            std::abort(); // min value is greater than max value
 
-    bool operator==(const SettingsEntry &other) const;
-    bool operator!=(const SettingsEntry &other) const;
-    bool hasSameName(const char *otherName) const;
+        if (defaultValue > maxValue)
+            std::abort(); // default value is greater than max value
+
+        if (defaultValue < minValue)
+            std::abort(); // default value is smaller than min value
+    }
+    constexpr bool operator==(const SettingsEntry &other) const
+    {
+        return name.compare(other.name) == 0;
+    }
+
+    constexpr bool operator!=(const SettingsEntry &other) const
+    {
+        return !(*this == other);
+    }
+
+    constexpr bool hasSameName(std::string_view otherName) const
+    {
+        return name.compare(otherName) == 0;
+    }
 };
 } // namespace settings
