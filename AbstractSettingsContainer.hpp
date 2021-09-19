@@ -66,6 +66,7 @@ public:
     {
         for (size_t i = 0; i < SettingsCount; ++i)
         {
+            containerArray[i].first = entryArray[i].name;
             containerArray[i].second = entryArray[i].defaultValue;
         }
         SettingsUser::notifySettingsUpdate();
@@ -75,6 +76,19 @@ public:
     constexpr const SettingsEntryArray<SettingsCount> &getAllSettings() const
     {
         return entryArray;
+    }
+
+    //----------------------------------------------------------------------------------------------
+    constexpr bool doesSettingExist(std::string_view name) const
+    {
+        for (auto &entry : containerArray)
+        {
+            if (entry.first.compare(name) == 0)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
 private:

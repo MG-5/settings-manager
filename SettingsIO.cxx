@@ -9,18 +9,15 @@
 
 namespace settings
 {
-
-SettingsIO *SettingsIO::instance{nullptr};
-
-SettingsIO::SettingsIO(i2c::RtosAccessor &i2cAccessor, Eeprom24LC64 &eeprom,
+SettingsIO::SettingsIO(Eeprom24LC64 &eeprom,
                        SettingsContainer &settings)
-    : i2cBusAccessor(i2cAccessor), //
-      eeprom(eeprom),              //
-      settings(settings)           //
+    : eeprom(eeprom),    //
+      settings(settings) //
 {
-    specialAssert(instance == nullptr);
-    instance = this;
+}
 
+void SettingsIO::init()
+{
     // hash field names to automatically invalidate eeprom content if settings datastructure changed
     settingsFieldNamesHash = bus_node_base::HASH_SEED;
 
@@ -34,43 +31,34 @@ SettingsIO::SettingsIO(i2c::RtosAccessor &i2cAccessor, Eeprom24LC64 &eeprom,
 
     // retrieve content
     bool readContentValid = true;
+    bool memoryisIncomplete = false;
     eeprom.read(MemoryOffset, reinterpret_cast<uint8_t *>(&rawContent), sizeof(EepromContent));
 
     // apply settings without notifying
     for (const auto &settingEntry : settings.getAllSettings().getEntries())
     {
-        if (!rawContent.settingsContainer.getAllSettings().doesSettingExist(settingEntry.name))
+        if (!rawContent.settingsContainer.doesSettingExist(settingEntry.name))
+        {
+            memoryisIncomplete = true;
             continue;
+        }
 
-        readContentValid = settings.setValue(
-            settingEntry.name, rawContent.settingsContainer.getValue(settingEntry.name), false);
-
-        if (!readContentValid)
-            break;
+        if (!settings.setValue(settingEntry.name,
+                               rawContent.settingsContainer.getValue(settingEntry.name), false))
+            readContentValid = false;
     }
 
     // validate header
-    if (readContentValid)
+    if (readContentValid && !memoryisIncomplete)
     {
         readContentValid = (rawContent.magicString == Signature) &&
                            rawContent.fieldsHash == settingsFieldNamesHash &&
                            rawContent.settingsHash == hashSettingsValues();
     }
 
-    if (!readContentValid)
+    if (!readContentValid || memoryisIncomplete)
     {
         rawContent.settingsContainer.resetAllToDefault();
-        write();
-    }
-}
-
-void SettingsIO::run()
-{
-    SettingsUser::notifySettingsUpdate();
-    for (;;)
-    {
-        // wait for call to saveSettings
-        //_task.notifyTake(portMAX_DELAY);
         write();
     }
 }
@@ -89,7 +77,7 @@ uint64_t SettingsIO::hashSettingsValues() const
 
 void SettingsIO::saveSettings()
 {
-    // _task.notifyGive();
+    write();
 }
 
 void SettingsIO::write()
@@ -106,28 +94,4 @@ void SettingsIO::write()
 
     eeprom.write(MemoryOffset, reinterpret_cast<uint8_t *>(&rawContent), sizeof(EepromContent));
 }
-
-void SettingsIO::signalFromISR(bool error)
-{
-    auto higherPrioTaskWoken = pdFALSE;
-    if (error)
-    {
-        instance->i2cBusAccessor.signalErrorFromIsr(&higherPrioTaskWoken);
-    }
-    else
-    {
-        instance->i2cBusAccessor.signalTransferCompleteFromIsr(&higherPrioTaskWoken);
-    }
-    portYIELD_FROM_ISR(higherPrioTaskWoken);
-}
-
-void SettingsIO::taskMain(void *param)
-{
-    auto inst = reinterpret_cast<SettingsIO *>(param);
-    inst->run();
-    for (;;)
-    {
-    }
-}
-
 } // namespace settings

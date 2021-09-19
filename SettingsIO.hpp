@@ -15,15 +15,14 @@ class SettingsIO
 {
 
 public:
-    SettingsIO(i2c::RtosAccessor &i2cAccessor, Eeprom24LC64 &eeprom, SettingsContainer &settings);
+    SettingsIO(Eeprom24LC64 &eeprom, SettingsContainer &settings);
+
+    void init();
 
     /// Non-blocking. Writes settings to eeprom
     void saveSettings();
 
-    static void signalFromISR(bool error);
-
 private:
-    i2c::RtosAccessor &i2cBusAccessor;
     Eeprom24LC64 &eeprom;
     SettingsContainer &settings;
     static SettingsIO *instance;
@@ -44,9 +43,6 @@ private:
 
     void write();
     uint64_t hashSettingsValues() const;
-
-    void run();
-    static void taskMain(void *param);
 };
 
 } // namespace settings

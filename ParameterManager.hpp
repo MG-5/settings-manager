@@ -1,12 +1,14 @@
 #pragma once
 
 #include "SettingsContainer.hpp"
+#include "SettingsIO.hpp"
 #include "uavcan/protocol/param_server.hpp"
 
 class ParameterManager : public uavcan::IParamManager
 {
 public:
-    explicit ParameterManager(settings::SettingsContainer &settingsContainer);
+    ParameterManager(settings::SettingsContainer &settingsContainer,
+                     settings::SettingsIO &settingsIO);
     void getParamNameByIndex(Index index, Name &outName) const override;
     void assignParamValue(const Name &name, const Value &value) override;
     void readParamValue(const Name &name, Value &outValue) const override;
@@ -17,4 +19,5 @@ public:
 
 private:
     settings::SettingsContainer &settingContainer;
+    settings::SettingsIO &settingsIO;
 };
