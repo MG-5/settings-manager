@@ -12,7 +12,7 @@ test:
   stage: test
   script:
     - mkdir tests/build
-    - cmake -S tests/ -B tests/build/
-    - make -C tests/build -j 8
-    - tests/build/testapp
+    - cmake . ..
+    - make  -j8
+    - testapp
 
