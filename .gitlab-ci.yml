@@ -1,0 +1,20 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - test
+
+default:
+  image: ubuntu:focal
+  before_script:
+    - export DEBIAN_FRONTEND=noninteractive
+    - apt-get update
+    - apt-get install -yq binutils-arm-none-eabi build-essential gcc-arm-none-eabi git cmake libgtest-dev pkg-config libgmock-dev ssh python3
+    
+test:
+  stage: test
+  script:
+    - cmake -S tests/ -B tests/build/
+    - make -C tests/build -j 8
+    - tests/build/testapp
+
