@@ -22,7 +22,7 @@ public:
     };
 
     //----------------------------------------------------------------------------------------------
-    [[nodiscard]] size_t size() const
+    [[nodiscard]] constexpr size_t size() const
     {
         return SettingsCount;
     }

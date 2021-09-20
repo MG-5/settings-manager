@@ -42,19 +42,6 @@ public:
     }
 
     //----------------------------------------------------------------------------------------------
-    constexpr bool doesSettingExist(std::string_view name) const
-    {
-        for (auto &entry : entryArray)
-        {
-            if (entry.hasSameName(name))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    //----------------------------------------------------------------------------------------------
     [[nodiscard]] constexpr const EntryArray_t &getEntries() const
     {
         return entryArray;

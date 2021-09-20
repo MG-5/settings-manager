@@ -5,7 +5,6 @@
 #include "SettingsContainer.hpp"
 
 #include <i2c-drivers/24lcxx.hpp>
-#include <i2c-drivers/rtos_accessor.hpp>
 
 #include <memory>
 

@@ -1,4 +1,5 @@
 #include "SettingsUser.hpp"
+#include "SpecialAssert.hpp"
 
 namespace settings
 {
@@ -6,7 +7,7 @@ SettingsUser::SettingsUser()
 {
     if (registeredInstancesCount == MaxInstances)
     {
-        configASSERT(0); // maximum number of instances reached
+        specialAssert(false); // maximum number of instances reached
     }
     registeredInstances[registeredInstancesCount++] = this;
 }

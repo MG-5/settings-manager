@@ -1,6 +1,7 @@
 #pragma once
-#include "FreeRTOS.h"
+
 #include <array>
+#include <cstdint>
 
 /**
  * @brief Inherit from this class to automatically subscribe to
