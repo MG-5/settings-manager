@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/tests/include",
+                "${workspaceFolder}/",
+                "/usr/include/**"
+            ],
+            "defines": [
+                "BUILDCONFIG_EMBEDDED_BUILD"
+            ],
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
