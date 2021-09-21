@@ -17,9 +17,9 @@ test:
     - cmake -S tests/ -B tests/build/ --coverage
     - make -C tests/build -j 8
     - make test -C tests/build
-coverage: /^\s*lines:\s*\d+.\d+\%/
-artifacts:
-  name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
-  reports:
-    cobertura: tests/build/coverage.xml
+  coverage: /^\s*lines:\s*\d+.\d+\%/
+  artifacts:
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    reports:
+      cobertura: tests/build/coverage.xml
 
