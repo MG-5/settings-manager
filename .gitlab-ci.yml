@@ -14,7 +14,7 @@ default:
 test:
   stage: test
   script:
-    - cmake -S tests/ -B tests/build/ --coverage
+    - cmake --coverage -S tests/ -B tests/build/ 
     - make -C tests/build -j 8
     - make test -C tests/build
   coverage: /^\s*lines:\s*\d+.\d+\%/
