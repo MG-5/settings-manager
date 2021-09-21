@@ -18,5 +18,5 @@ test:
     - cd tests/build
     - cmake . ..
     - make -j8
-    - testapp
+    - ./testapp
 
