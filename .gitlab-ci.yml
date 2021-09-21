@@ -9,12 +9,17 @@ default:
   before_script:
     - export DEBIAN_FRONTEND=noninteractive
     - apt-get update
-    - apt-get install -yq build-essential git cmake libgtest-dev pkg-config libgmock-dev ssh python3
+    - apt-get install -yq build-essential git cmake libgtest-dev pkg-config libgmock-dev ssh python3 gcovr
     
 test:
   stage: test
   script:
-    - cmake -S tests/ -B tests/build/
+    - cmake -S tests/ -B tests/build/ --coverage
     - make -C tests/build -j 8
-    - tests/build/testapp
+    - make test -C tests/build
+coverage: /^\s*lines:\s*\d+.\d+\%/
+artifacts:
+  name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+  reports:
+    cobertura: tests/build/coverage.xml
 
