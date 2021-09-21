@@ -24,7 +24,7 @@ TEST(SettingsEntryArray, NoDuplicates)
 {
     EXPECT_NO_FATAL_FAILURE(SettingsEntryArray<settingsArray1.size()> foo1(settingsArray1));
 
-    EXPECT_THROW(SettingsEntryArray<settingsArray2.size()> foo2(settingsArray2), std::runtime_error);
+    EXPECT_DEATH(SettingsEntryArray<settingsArray2.size()> foo2(settingsArray2), "");
 };
 
 TEST(SettingsEntryArray, Size)
@@ -42,8 +42,8 @@ TEST(SettingsEntryArray, getEntryByName)
     EXPECT_EQ(entryArray.getEntryByName("entry1"), settingsArray1[0]);
     EXPECT_EQ(entryArray.getEntryByName("entry2"), settingsArray1[1]);
     EXPECT_EQ(entryArray.getEntryByName("entry3"), settingsArray1[2]);
-    EXPECT_THROW(entryArray.getEntryByName(""), std::runtime_error);
-    EXPECT_THROW(entryArray.getEntryByName("nonExistentEntry"), std::runtime_error);
+    EXPECT_DEATH(entryArray.getEntryByName(""), "");
+    EXPECT_DEATH(entryArray.getEntryByName("nonExistentEntry"), "");
 };
 
 TEST(SettingsEntryArray, atOperator)
@@ -51,7 +51,7 @@ TEST(SettingsEntryArray, atOperator)
     EXPECT_EQ(entryArray.at(0), settingsArray1[0]);
     EXPECT_EQ(entryArray.at(1), settingsArray1[1]);
     EXPECT_EQ(entryArray.at(2), settingsArray1[2]);
-    EXPECT_THROW(entryArray.at(10), std::runtime_error);
+    EXPECT_DEATH(entryArray.at(10), "");
 };
 
 TEST(SettingsEntryArray, getIndex)
@@ -59,8 +59,8 @@ TEST(SettingsEntryArray, getIndex)
     EXPECT_EQ(entryArray.getIndex("entry1"), 0);
     EXPECT_EQ(entryArray.getIndex("entry2"), 1);
     EXPECT_EQ(entryArray.getIndex("entry3"), 2);
-    EXPECT_THROW(entryArray.getIndex(""), std::runtime_error);
-    EXPECT_THROW(entryArray.getIndex("nonExistentEntry"), std::runtime_error);
+    EXPECT_DEATH(entryArray.getIndex(""), "");
+    EXPECT_DEATH(entryArray.getIndex("nonExistentEntry"), "");
 };
 
 } // namespace

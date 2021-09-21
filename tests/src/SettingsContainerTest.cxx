@@ -26,8 +26,8 @@ TEST_F(SettingsContainerTest, getDefaultValues)
     EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry3), 3.7);
     EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry4), 1.0);
 
-    EXPECT_THROW(settingsContainer.getValue(""), std::runtime_error);
-    EXPECT_THROW(settingsContainer.getValue("nonExistentEntry"), std::runtime_error);
+    EXPECT_DEATH(settingsContainer.getValue(""), "");
+    EXPECT_DEATH(settingsContainer.getValue("nonExistentEntry"), "");
 };
 
 TEST_F(SettingsContainerTest, setValues)
@@ -42,8 +42,8 @@ TEST_F(SettingsContainerTest, setValues)
     EXPECT_FALSE(settingsContainer.setValue(Entry3, 0.8f, false));
     EXPECT_FALSE(settingsContainer.setValue(Entry4, 6.0f, false));
 
-    EXPECT_THROW(settingsContainer.setValue("", 1), std::runtime_error);
-    EXPECT_THROW(settingsContainer.setValue("nonExistentEntry", 1), std::runtime_error);
+    EXPECT_DEATH(settingsContainer.setValue("", 1), "");
+    EXPECT_DEATH(settingsContainer.setValue("nonExistentEntry", 1), "");
 
     EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry1), 2.1);
     EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry2), 2.2);

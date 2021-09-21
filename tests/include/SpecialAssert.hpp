@@ -4,5 +4,5 @@
 static void specialAssert(bool val)
 {
     if (!val)
-        throw std::runtime_error("special assert");
+        std::abort();
 }

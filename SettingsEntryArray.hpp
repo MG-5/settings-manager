@@ -26,9 +26,9 @@ public:
                     continue;
                 }
                 if (i == j)
-                    throw std::runtime_error("duplicates found");
+                    std::abort();
                 // at compile-time you will get an error which says that
-                // std::runtime_error is not a constexpr function. This is only
+                // std::abort is not a constexpr function. This is only
                 // triggered if you have a duplicate
             }
         }
