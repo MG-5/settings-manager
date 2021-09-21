@@ -24,7 +24,8 @@ set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_FLAGS "-Wno-deprecated-declarations -Wno-int-to-pointer-cast")
 
 include_directories(
-    ../ 
+    ../
+    fake
     include
 )
 
@@ -34,13 +35,14 @@ src/main.cxx
 
 # firmware
 #../ParameterManager.cxx
-#../SettingsIO.cxx
+../SettingsIO.cxx
 ../SettingsUser.cxx
 
 # base
 
 
 #  test
+src/FakeMemoryTest.cxx
 src/ParameterManagerTest.cxx
 src/SettingsContainerTest.cxx
 src/SettingsEntryArrayTest.cxx

@@ -3,6 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
+                "${workspaceFolder}/tests/fake",
                 "${workspaceFolder}/tests/include",
                 "${workspaceFolder}/",
                 "/usr/include/**"

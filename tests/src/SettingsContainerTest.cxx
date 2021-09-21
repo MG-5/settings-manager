@@ -1,59 +1,77 @@
-#include "SettingsContainerTest.hpp"
+#include "SettingsContainer.hpp"
 #include <gtest/gtest.h>
 
 namespace
 {
 using namespace settings;
 
-SettingsContainer settingsContainer;
+class SettingsContainerTest : public ::testing::Test
+{
+protected:
+    SettingsContainerTest()
+    {
+    }
+    SettingsContainer settingsContainer;
+};
 
-TEST(SettingsContainer, Size)
+TEST_F(SettingsContainerTest, Size)
 {
     EXPECT_EQ(settingsContainer.size(), SettingsEntries.size());
 };
 
-TEST(SettingsContainer, getDefaultValues)
+TEST_F(SettingsContainerTest, getDefaultValues)
 {
-    EXPECT_FLOAT_EQ(settingsContainer.getValue("entry1"), 4.0);
-    EXPECT_FLOAT_EQ(settingsContainer.getValue("entry2"), 3.0);
-    EXPECT_FLOAT_EQ(settingsContainer.getValue("entry3"), 3.7);
-    EXPECT_FLOAT_EQ(settingsContainer.getValue("entry4"), 1.0);
-    EXPECT_DEATH(settingsContainer.getValue(""), "");
-    EXPECT_DEATH(settingsContainer.getValue("nonExistentEntry"), "");
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry1), 4.0);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry2), 3.0);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry3), 3.7);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry4), 1.0);
+
+    EXPECT_THROW(settingsContainer.getValue(""), std::runtime_error);
+    EXPECT_THROW(settingsContainer.getValue("nonExistentEntry"), std::runtime_error);
 };
 
-TEST(SettingsContainer, setValues)
+TEST_F(SettingsContainerTest, setValues)
 {
-    EXPECT_TRUE(settingsContainer.setValue("entry1", 2.1f, false));
-    EXPECT_TRUE(settingsContainer.setValue("entry2", 2.2f, false));
-    EXPECT_TRUE(settingsContainer.setValue("entry3", 2.3f, false));
-    EXPECT_TRUE(settingsContainer.setValue("entry4", 2.4f, false));
+    EXPECT_TRUE(settingsContainer.setValue(Entry1, 2.1f, false));
+    EXPECT_TRUE(settingsContainer.setValue(Entry2, 2.2f, false));
+    EXPECT_TRUE(settingsContainer.setValue(Entry3, 2.3f, false));
+    EXPECT_TRUE(settingsContainer.setValue(Entry4, 2.4f, false));
 
-    EXPECT_FALSE(settingsContainer.setValue("entry1", 0.0f, false));
-    EXPECT_FALSE(settingsContainer.setValue("entry2", 22.0f, false));
-    EXPECT_FALSE(settingsContainer.setValue("entry3", 0.8f, false));
-    EXPECT_FALSE(settingsContainer.setValue("entry4", 6.0f, false));
+    EXPECT_FALSE(settingsContainer.setValue(Entry1, 0.0f, false));
+    EXPECT_FALSE(settingsContainer.setValue(Entry2, 22.0f, false));
+    EXPECT_FALSE(settingsContainer.setValue(Entry3, 0.8f, false));
+    EXPECT_FALSE(settingsContainer.setValue(Entry4, 6.0f, false));
 
-    EXPECT_DEATH(settingsContainer.setValue("", 1), "");
-    EXPECT_DEATH(settingsContainer.setValue("nonExistentEntry", 1), "");
+    EXPECT_THROW(settingsContainer.setValue("", 1), std::runtime_error);
+    EXPECT_THROW(settingsContainer.setValue("nonExistentEntry", 1), std::runtime_error);
+
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry1), 2.1);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry2), 2.2);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry3), 2.3);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry4), 2.4);
 };
 
-TEST(SettingsContainer, getDefaultValuesAfterReset)
+TEST_F(SettingsContainerTest, getDefaultValuesAfterReset)
 {
+    EXPECT_TRUE(settingsContainer.setValue(Entry1, 2.1f, false));
+    EXPECT_TRUE(settingsContainer.setValue(Entry2, 2.2f, false));
+    EXPECT_TRUE(settingsContainer.setValue(Entry3, 2.3f, false));
+    EXPECT_TRUE(settingsContainer.setValue(Entry4, 2.4f, false));
+
     settingsContainer.resetAllToDefault();
 
-    EXPECT_FLOAT_EQ(settingsContainer.getValue("entry1"), 4.0);
-    EXPECT_FLOAT_EQ(settingsContainer.getValue("entry2"), 3.0);
-    EXPECT_FLOAT_EQ(settingsContainer.getValue("entry3"), 3.7);
-    EXPECT_FLOAT_EQ(settingsContainer.getValue("entry4"), 1.0);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry1), 4.0);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry2), 3.0);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry3), 3.7);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry4), 1.0);
 };
 
-TEST(SettingsContainer, doesSettingExist)
+TEST_F(SettingsContainerTest, doesSettingExist)
 {
-    EXPECT_TRUE(settingsContainer.doesSettingExist("entry1"));
-    EXPECT_TRUE(settingsContainer.doesSettingExist("entry2"));
-    EXPECT_TRUE(settingsContainer.doesSettingExist("entry3"));
-    EXPECT_TRUE(settingsContainer.doesSettingExist("entry4"));
+    EXPECT_TRUE(settingsContainer.doesSettingExist(Entry1));
+    EXPECT_TRUE(settingsContainer.doesSettingExist(Entry2));
+    EXPECT_TRUE(settingsContainer.doesSettingExist(Entry3));
+    EXPECT_TRUE(settingsContainer.doesSettingExist(Entry4));
     EXPECT_FALSE(settingsContainer.doesSettingExist(""));
     EXPECT_FALSE(settingsContainer.doesSettingExist("nonExistentEntry"));
 };

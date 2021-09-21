@@ -31,9 +31,10 @@ TEST(SettingsEntry, NotEquality)
 
 TEST(SettingsEntry, WrongConstruction)
 {
-    EXPECT_DEATH(SettingsEntry(3, 1, 2, "wrongEntry"), "");
-    EXPECT_DEATH(SettingsEntry(0, 3, 2, "wrongEntry"), "");
-    EXPECT_DEATH(SettingsEntry(1, 1, 0, "wrongEntry"), "");
+    EXPECT_THROW(SettingsEntry(3, 1, 2, "wrongEntry"), std::runtime_error);
+    EXPECT_THROW(SettingsEntry(0, 3, 2, "wrongEntry"), std::runtime_error);
+    EXPECT_THROW(SettingsEntry(1, 1, 0, "wrongEntry"), std::runtime_error);
+    EXPECT_THROW(SettingsEntry(1, 0, 2, "wrongEntry"), std::runtime_error);
 };
 
 TEST(SettingsEntry, CopyConstructor)

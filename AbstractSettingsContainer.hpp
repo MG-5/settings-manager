@@ -91,6 +91,12 @@ public:
         return false;
     }
 
+    //----------------------------------------------------------------------------------------------
+    constexpr bool operator==(const AbstractSettingsContainer &other) const
+    {
+        return containerArray == other.containerArray;
+    }
+
 private:
     ContainerArray containerArray{};
 };

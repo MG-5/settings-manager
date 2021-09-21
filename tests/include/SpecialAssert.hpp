@@ -3,5 +3,6 @@
 
 static void specialAssert(bool val)
 {
-    std::abort();
+    if (!val)
+        throw std::runtime_error("special assert");
 }
