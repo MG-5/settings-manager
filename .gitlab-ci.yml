@@ -14,6 +14,7 @@ default:
 test:
   stage: test
   script:
+    - mkdir tests/build
     - cd tests/build
     - cmake --coverage . .. 
     - make -j8
