@@ -1,12 +1,7 @@
 #pragma once
-#include "FreeRTOS.h"
-#include <cmsis_os2.h>
 
 #include "SettingsContainer.hpp"
-
 #include <i2c-drivers/24lcxx.hpp>
-
-#include <memory>
 
 namespace settings
 {
@@ -24,7 +19,6 @@ public:
 private:
     Eeprom24LC64 &eeprom;
     SettingsContainer &settings;
-    static SettingsIO *instance;
 
     static constexpr size_t Signature = 0x0110CA6E;
 
