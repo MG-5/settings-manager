@@ -83,6 +83,9 @@ public:
     {
         for (auto &entry : containerArray)
         {
+            if (entry.first.size() > 0xFF)
+                continue;
+
             if (entry.first.compare(name) == 0)
             {
                 return true;
