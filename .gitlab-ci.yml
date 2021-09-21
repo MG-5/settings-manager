@@ -14,9 +14,10 @@ default:
 test:
   stage: test
   script:
-    - cmake --coverage -S tests/ -B tests/build/ 
-    - make -C tests/build -j 8
-    - make test -C tests/build
+    - cd tests/build
+    - cmake --coverage . .. 
+    - make -j8
+    - make test
     - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
   coverage: /^\s*lines:\s*\d+.\d+\%/
   artifacts:
