@@ -13,6 +13,9 @@ public:
 
     void init();
 
+    /// Read and verify settings from eeprom, returns true if valid
+    bool loadSettings(bool shouldNotify = true);
+
     /// Non-blocking. Writes settings to eeprom
     void saveSettings();
 
@@ -24,18 +27,19 @@ private:
 
     struct EepromContent
     {
-        uint64_t fieldsHash;
-        uint64_t settingsHash;
+        uint64_t settingsNamesHash;
+        uint64_t settingsValuesHash;
         size_t magicString = Signature;
         SettingsContainer settingsContainer{};
     };
 
     static constexpr uint16_t MemoryOffset = 0;
     EepromContent rawContent;
-    uint64_t settingsFieldNamesHash;
 
-    void write();
+    uint64_t hashSettingsNames() const;
     uint64_t hashSettingsValues() const;
+
+    const uint64_t settingsNamesHash = hashSettingsNames();
 };
 
 } // namespace settings

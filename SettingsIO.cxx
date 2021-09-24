@@ -14,51 +14,49 @@ SettingsIO::SettingsIO(Eeprom24LC64 &eeprom,
 {
 }
 
-void SettingsIO::init()
+bool SettingsIO::loadSettings(bool shouldNotify)
 {
-    // hash field names to automatically invalidate eeprom content if settings datastructure changed
-    settingsFieldNamesHash = bus_node_base::HASH_SEED;
-
-    for (const auto &settingEntry : settings.getAllSettings().getEntries())
-    {
-        settingsFieldNamesHash = bus_node_base::fnvWithSeed(
-            settingsFieldNamesHash,
-            reinterpret_cast<const uint8_t *>(std::begin(settingEntry.name)),
-            reinterpret_cast<const uint8_t *>(std::end(settingEntry.name)));
-    }
-
-    // retrieve content
-    bool readContentValid = true;
-    bool memoryisIncomplete = false;
     eeprom.read(MemoryOffset, reinterpret_cast<uint8_t *>(&rawContent), sizeof(EepromContent));
 
-    // apply settings without notifying
-    for (const auto &settingEntry : settings.getAllSettings().getEntries())
-    {
-        if (!rawContent.settingsContainer.doesSettingExist(settingEntry.name))
-        {
-            memoryisIncomplete = true;
-            continue;
-        }
+    // verify header
+    bool isValid = (rawContent.magicString == Signature) &&             //
+                   rawContent.settingsNamesHash == settingsNamesHash && //
+                   rawContent.settingsValuesHash == hashSettingsValues();
 
-        if (!settings.setValue(settingEntry.name,
-                               rawContent.settingsContainer.getValue(settingEntry.name), false))
-            readContentValid = false;
-    }
-
-    // validate header
-    if (readContentValid && !memoryisIncomplete)
-    {
-        readContentValid = (rawContent.magicString == Signature) &&
-                           rawContent.fieldsHash == settingsFieldNamesHash &&
-                           rawContent.settingsHash == hashSettingsValues();
-    }
-
-    if (!readContentValid || memoryisIncomplete)
+    if (!isValid)
     {
         rawContent.settingsContainer.resetAllToDefault();
-        write();
+        saveSettings();
+        return false;
     }
+
+    // apply settings
+    for (const auto &settingEntry : settings.getAllSettings().getEntries())
+    {
+        if (!settings.setValue(settingEntry.name,
+                               rawContent.settingsContainer.getValue(settingEntry.name), false))
+        {
+            rawContent.settingsContainer.setValue(settingEntry.name, settingEntry.defaultValue,
+                                                  false);
+            saveSettings();
+        }
+    }
+
+    if (shouldNotify)
+        SettingsUser::notifySettingsUpdate();
+    return true;
+}
+
+uint64_t SettingsIO::hashSettingsNames() const
+{
+    uint64_t hash = bus_node_base::HASH_SEED;
+    for (const auto &settingEntry : settings.getAllSettings().getEntries())
+    {
+        hash = bus_node_base::fnvWithSeed(
+            hash, reinterpret_cast<const uint8_t *>(std::begin(settingEntry.name)),
+            reinterpret_cast<const uint8_t *>(std::end(settingEntry.name)));
+    }
+    return hash;
 }
 
 uint64_t SettingsIO::hashSettingsValues() const
@@ -75,14 +73,9 @@ uint64_t SettingsIO::hashSettingsValues() const
 
 void SettingsIO::saveSettings()
 {
-    write();
-}
-
-void SettingsIO::write()
-{
     rawContent.magicString = Signature;
-    rawContent.fieldsHash = settingsFieldNamesHash;
-    rawContent.settingsHash = hashSettingsValues();
+    rawContent.settingsNamesHash = settingsNamesHash;
+    rawContent.settingsValuesHash = hashSettingsValues();
 
     for (const auto &settingEntry : settings.getAllSettings().getEntries())
     {
