@@ -2,6 +2,7 @@
 
 using namespace uavcan::protocol::param;
 
+//----------------------------------------------------------------------------------------------
 void ParameterManager::getParamNameByIndex(Index index, Name &outName) const
 {
     if (index < settingContainer.size())
@@ -10,6 +11,7 @@ void ParameterManager::getParamNameByIndex(Index index, Name &outName) const
     }
 }
 
+//----------------------------------------------------------------------------------------------
 void ParameterManager::assignParamValue(const Name &name, const Value &value)
 {
     if (settingContainer.doesSettingExist(name.c_str()))
@@ -22,6 +24,7 @@ void ParameterManager::assignParamValue(const Name &name, const Value &value)
     }
 }
 
+//----------------------------------------------------------------------------------------------
 void ParameterManager::readParamValue(const Name &name, Value &outValue) const
 {
     if (settingContainer.doesSettingExist(name.c_str()))
@@ -30,6 +33,7 @@ void ParameterManager::readParamValue(const Name &name, Value &outValue) const
     }
 }
 
+//----------------------------------------------------------------------------------------------
 void ParameterManager::readParamDefaultMaxMin(const Name &name, Value &outDef, NumericValue &outMax,
                                               NumericValue &outMin) const
 {
@@ -42,18 +46,22 @@ void ParameterManager::readParamDefaultMaxMin(const Name &name, Value &outDef, N
     }
 }
 
+//----------------------------------------------------------------------------------------------
 int ParameterManager::saveAllParams()
 {
     settingsIO.saveSettings();
     return 0;
 }
 
+//----------------------------------------------------------------------------------------------
 int ParameterManager::eraseAllParams()
 {
     settingContainer.resetAllToDefault(true);
     settingsIO.saveSettings();
     return 0;
 }
+
+//----------------------------------------------------------------------------------------------
 ParameterManager::ParameterManager(settings::SettingsContainer &settingsContainer,
                                    settings::SettingsIO &settingsIO)
     : settingContainer(settingsContainer), settingsIO(settingsIO)

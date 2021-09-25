@@ -14,6 +14,7 @@ class SettingsEntryArray
 public:
     using EntryArray_t = std::array<SettingsEntry, SettingsCount>;
 
+    //----------------------------------------------------------------------------------------------
     constexpr explicit SettingsEntryArray(EntryArray_t entryArray) : entryArray(entryArray)
     {
         // check for duplicates
@@ -34,6 +35,7 @@ public:
         }
     }
 
+    //----------------------------------------------------------------------------------------------
     ~SettingsEntryArray() = default;
 
     //----------------------------------------------------------------------------------------------
@@ -54,6 +56,7 @@ public:
         return entryArray[getIndex(name)];
     }
 
+    //----------------------------------------------------------------------------------------------
     constexpr const SettingsEntry &at(size_t index) const
     {
         if (index < SettingsCount)
@@ -63,11 +66,13 @@ public:
         return entryArray[0];
     }
 
+    //----------------------------------------------------------------------------------------------
     constexpr const SettingsEntry &operator[](size_t index) const
     {
         return at(index);
     }
 
+    //----------------------------------------------------------------------------------------------
     constexpr size_t getIndex(std::string_view name) const
     {
         for (size_t i = 0; i < SettingsCount; i++)

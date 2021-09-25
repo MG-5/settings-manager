@@ -13,11 +13,13 @@ SettingsUser::SettingsUser()
     registeredInstances[index] = this;
 }
 
+//----------------------------------------------------------------------------------------------
 SettingsUser::~SettingsUser()
 {
     registeredInstances[index] = nullptr;
 }
 
+//----------------------------------------------------------------------------------------------
 void SettingsUser::notifySettingsUpdate()
 {
     for (uint8_t i = 0; i < registeredInstancesCount; ++i)

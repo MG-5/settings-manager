@@ -17,6 +17,7 @@ public:
     const SettingsValue_t maxValue;
     const std::string_view name;
 
+    //----------------------------------------------------------------------------------------------
     constexpr SettingsEntry(const SettingsValue_t min, const SettingsValue_t defaultValue,
                             const SettingsValue_t max, std::string_view name)
         : minValue{min}, defaultValue{defaultValue}, maxValue{max}, name{name}
@@ -35,16 +36,19 @@ public:
             std::abort(); // default value is smaller than min value
     }
 
+    //----------------------------------------------------------------------------------------------
     constexpr bool operator==(const SettingsEntry &other) const
     {
         return name.compare(other.name) == 0;
     }
 
+    //----------------------------------------------------------------------------------------------
     constexpr bool operator!=(const SettingsEntry &other) const
     {
         return !(*this == other);
     }
 
+    //----------------------------------------------------------------------------------------------
     constexpr bool hasSameName(std::string_view otherName) const
     {
         return name.compare(otherName) == 0;

@@ -13,6 +13,7 @@ SettingsIO::SettingsIO(Eeprom24LC64 &eeprom,
 {
 }
 
+//----------------------------------------------------------------------------------------------
 bool SettingsIO::loadSettings(bool shouldNotify)
 {
     eeprom.read(MemoryOffset, reinterpret_cast<uint8_t *>(&rawContent), sizeof(EepromContent));
@@ -46,6 +47,7 @@ bool SettingsIO::loadSettings(bool shouldNotify)
     return true;
 }
 
+//----------------------------------------------------------------------------------------------
 uint64_t SettingsIO::hashSettingsNames() const
 {
     uint64_t hash = bus_node_base::HASH_SEED;
@@ -58,6 +60,7 @@ uint64_t SettingsIO::hashSettingsNames() const
     return hash;
 }
 
+//----------------------------------------------------------------------------------------------
 uint64_t SettingsIO::hashSettingsValues() const
 {
     uint64_t hash = bus_node_base::HASH_SEED;
@@ -70,6 +73,7 @@ uint64_t SettingsIO::hashSettingsValues() const
     return hash;
 }
 
+//----------------------------------------------------------------------------------------------
 void SettingsIO::saveSettings()
 {
     rawContent.magicString = Signature;
