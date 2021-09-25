@@ -16,9 +16,9 @@ Here is a template file with example settings:
 
 namespace settings
 {
-constexpr std::string_view CarMass = "CarMass";
-constexpr std::string_view CarWheelRadius = "CarWheelRadius";
-constexpr std::string_view MotorMagnetCount = "MotorMagnetCount";
+constexpr std::string_view CarMass = "car mass";
+constexpr std::string_view CarWheelRadius = "car wheel radius";
+constexpr std::string_view MotorMagnetCount = "motor magnet count";
 
 constexpr std::array SettingsEntries = {
     SettingsEntry{0.001, 2.5, 10.0, CarMass},           //
