@@ -11,8 +11,6 @@ class SettingsIO
 public:
     SettingsIO(Eeprom24LC64 &eeprom, SettingsContainer &settings);
 
-    void init();
-
     /// Read and verify settings from eeprom, returns true if valid
     bool loadSettings(bool shouldNotify = true);
 

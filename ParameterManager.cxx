@@ -50,7 +50,7 @@ int ParameterManager::saveAllParams()
 
 int ParameterManager::eraseAllParams()
 {
-    settingContainer.resetAllToDefault();
+    settingContainer.resetAllToDefault(true);
     settingsIO.saveSettings();
     return 0;
 }

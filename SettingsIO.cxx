@@ -1,6 +1,5 @@
 #include "SettingsIO.hpp"
 #include "SettingsUser.hpp"
-#include "SpecialAssert.hpp"
 #include "core/hash.hpp"
 
 #include <string_view>
@@ -25,7 +24,7 @@ bool SettingsIO::loadSettings(bool shouldNotify)
 
     if (!isValid)
     {
-        rawContent.settingsContainer.resetAllToDefault();
+        rawContent.settingsContainer.resetAllToDefault(false);
         saveSettings();
         return false;
     }

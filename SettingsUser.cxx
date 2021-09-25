@@ -9,7 +9,13 @@ SettingsUser::SettingsUser()
     {
         specialAssert(false); // maximum number of instances reached
     }
-    registeredInstances[registeredInstancesCount++] = this;
+    index = registeredInstancesCount++;
+    registeredInstances[index] = this;
+}
+
+SettingsUser::~SettingsUser()
+{
+    registeredInstances[index] = nullptr;
 }
 
 void SettingsUser::notifySettingsUpdate()

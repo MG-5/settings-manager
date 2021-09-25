@@ -58,7 +58,7 @@ TEST_F(SettingsContainerTest, getDefaultValuesAfterReset)
     EXPECT_TRUE(settingsContainer.setValue(Entry3, 2.3f, false));
     EXPECT_TRUE(settingsContainer.setValue(Entry4, 2.4f, false));
 
-    settingsContainer.resetAllToDefault();
+    settingsContainer.resetAllToDefault(false);
 
     EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry1), 4.0);
     EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry2), 3.0);

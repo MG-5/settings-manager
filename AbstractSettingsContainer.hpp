@@ -62,14 +62,16 @@ public:
     }
 
     //----------------------------------------------------------------------------------------------
-    void resetAllToDefault()
+    void resetAllToDefault(bool shouldNotify)
     {
         for (size_t i = 0; i < SettingsCount; ++i)
         {
             containerArray[i].first = entryArray[i].name;
             containerArray[i].second = entryArray[i].defaultValue;
         }
-        SettingsUser::notifySettingsUpdate();
+
+        if (shouldNotify)
+            SettingsUser::notifySettingsUpdate();
     }
 
     //----------------------------------------------------------------------------------------------

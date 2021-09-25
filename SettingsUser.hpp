@@ -15,8 +15,7 @@ class SettingsUser
 {
 public:
     SettingsUser();
-    virtual ~SettingsUser() = default;
-    // TODO copy, move operator+constructorw
+    ~SettingsUser();
 
     /**
      * @brief User implemented function that queries relevant settings and save their own copy
@@ -32,6 +31,7 @@ public:
     static void notifySettingsUpdate();
 
 private:
+    uint8_t index;
     static constexpr uint8_t MaxInstances = 16;
     static std::array<SettingsUser *, MaxInstances> registeredInstances;
     static uint8_t registeredInstancesCount;
