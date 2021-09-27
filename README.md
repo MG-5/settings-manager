@@ -41,9 +41,13 @@ To add a new setting entry to your system, do following things:
 
 1. Add a `constexpr string_view` constant with your settings name to the settings namespace. This will be used to access settings from anywhere. **Attention: this name must be unique!**
 2. Create a `SettingsEntry` with the name from 1. and its minimum, default and maximum value and add this to the `SettingsEntries` array;
-
-
-### SettingsUser
+  
+<br><!-- <stupid_meme> --></br>
+<br></br>
+<sup>Stand Master: Child Class </sup>  
+<sup>Stand Name: </sup>  
+### 「SettingsUser」
+<!-- </stupid_meme> -->
 
 All classes using settings should inherit from here and implement the `onSettingsUpdate()` function. This function is guaranteed to be called at least once when the EEPROM is finished initializing (your class must be contstructed before that of course). When called before EEPROM is ready you will only get default values.
 Will be called when someone updates the value by calling the static `notifySettingsUpdate()` function.
