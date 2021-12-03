@@ -1,49 +1,61 @@
-#include "SettingsEntry.hpp"
+#include "parameter_manager/SettingsEntry.hpp"
 #include <gtest/gtest.h>
 
-namespace
-{
 using namespace settings;
 
-SettingsEntry entry1(0, 1, 2, "testEntry");
-SettingsEntry entry2(1, 2, 3, "testEntry");
-SettingsEntry entry3(0, 1, 2, "otherEntry");
-
-constexpr SettingsEntry entry4(0, 1, 2, "testEntry");
-constexpr SettingsEntry entry5(1, 2, 3, "testEntry");
-constexpr SettingsEntry entry6(0, 1, 2, "otherEntry");
-
-TEST(SettingsEntry, Equality)
+class SettingsEntryTest : public ::testing::Test
 {
-    EXPECT_TRUE(entry1 == entry2);
-    EXPECT_FALSE(entry1 == entry3);
-    EXPECT_TRUE(entry4 == entry5);
-    EXPECT_FALSE(entry4 == entry6);
+protected:
+    static constexpr std::string_view Name1 =  "testEntry";
+    static constexpr std::string_view Name2 =  "otherEntry";
+
+    SettingsEntryTest()
+        : entry(0, 1, 2, Name1), //
+          entry_otherValues_sameName(1, 2, 3, Name1), //
+          entry_otherName_sameValues(0, 1, 2, Name2)
+    {
+        static_assert(Name1.compare(Name2) != 0);
+    }
+
+    SettingsEntry entry;
+    SettingsEntry entry_otherValues_sameName;
+    SettingsEntry entry_otherName_sameValues;
 };
 
-TEST(SettingsEntry, NotEquality)
+TEST_F(SettingsEntryTest, isValid)
 {
-    EXPECT_FALSE(entry1 != entry2);
-    EXPECT_TRUE(entry1 != entry3);
-    EXPECT_FALSE(entry4 != entry5);
-    EXPECT_TRUE(entry4 != entry6);
-};
+    {
+        SettingsEntry entry(1, 2, 3, Name1);
+        EXPECT_TRUE(entry.isValid());
+    }
 
-TEST(SettingsEntry, WrongConstruction)
-{
-    EXPECT_DEATH(SettingsEntry(3, 1, 2, "wrongEntry"), "");
-    EXPECT_DEATH(SettingsEntry(0, 3, 2, "wrongEntry"), "");
-    EXPECT_DEATH(SettingsEntry(1, 1, 0, "wrongEntry"), "");
-    EXPECT_DEATH(SettingsEntry(1, 0, 2, "wrongEntry"), "");
-};
+    {
+        // min > max
+        SettingsEntry entry(10, 2, 3, Name1);
+        EXPECT_FALSE(entry.isValid());
+    }
 
-TEST(SettingsEntry, CopyConstructor)
-{
-    SettingsEntry testEntry1 = entry1;
-    constexpr SettingsEntry testEntry2 = entry4;
+    {
+        // default > max
+        SettingsEntry entry(1, 20, 3, Name1);
+        EXPECT_FALSE(entry.isValid());
+    }
 
-    EXPECT_EQ(testEntry1, entry1);
-    EXPECT_EQ(testEntry2, entry4);
+    {
+        // max < min
+        SettingsEntry entry(-1, 0, -3, Name1);
+        EXPECT_FALSE(entry.isValid());
+    }
+
+    {
+        // max < default
+        SettingsEntry entry(-100, 2, -3, Name1);
+        EXPECT_FALSE(entry.isValid());
+    }
 }
 
-} // namespace
+TEST_F(SettingsEntryTest, SameName)
+{
+    EXPECT_TRUE(entry.hasSameName(entry_otherValues_sameName.name));
+    EXPECT_FALSE(entry.hasSameName(entry_otherName_sameValues.name));
+}

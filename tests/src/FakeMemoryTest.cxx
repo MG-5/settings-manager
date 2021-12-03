@@ -1,45 +1,47 @@
+#include "fake/i2c-drivers/Fake24LC64.hpp"
+#include "stub/BusAccessor.hpp"
 #include <gtest/gtest.h>
-#include <i2c-drivers/24lcxx.hpp>
+#include <exception>
 
 namespace
 {
-constexpr auto SizeInBytes = 256;
+constexpr auto SizeInBytes = FakeEeprom24LC64::getSizeInBytes();
 
 class FakeMemoryTest : public ::testing::Test
 {
 protected:
-    FakeMemoryTest()
+    FakeMemoryTest() : accessor(), eeprom(accessor)
     {
     }
-    Eeprom24LCXX<SizeInBytes> eeprom;
+
+    BusAccessorStub accessor;
+    FakeEeprom24LC64 eeprom;
 };
 
 TEST_F(FakeMemoryTest, readDefaultEeprom)
 {
-    std::array<uint8_t, SizeInBytes> tempMemory;
+    std::array<uint8_t, SizeInBytes> tempMemory = {0};
     eeprom.read(0, tempMemory.data(), SizeInBytes);
 
     for (size_t i = 0; i < SizeInBytes; i++)
     {
-        EXPECT_EQ(tempMemory[i], 0xFF);
+        ASSERT_EQ(tempMemory[i], 0xFF);
     }
 };
 
 TEST_F(FakeMemoryTest, writeRead)
 {
-    std::array<uint8_t, SizeInBytes> tempMemory;
+    std::array<uint8_t, SizeInBytes> tempMemory = {0};
 
+    uint8_t rollingData = 0;
     for (size_t i = 0; i < SizeInBytes; i++)
     {
-        eeprom.write(i, reinterpret_cast<uint8_t *>(&i), 1);
-    }
+        eeprom.write(i, &rollingData, 1);
 
-    std::array<uint8_t, SizeInBytes> temp2Memory;
-    eeprom.read(0, temp2Memory.data(), SizeInBytes);
-
-    for (size_t i = 0; i < SizeInBytes; i++)
-    {
-        EXPECT_EQ(temp2Memory[i], i);
+        uint8_t readData = 0;
+        eeprom.read(i, &readData, 1);
+        ASSERT_EQ(readData, rollingData);
+        rollingData++;
     }
 };
 
@@ -48,16 +50,19 @@ TEST_F(FakeMemoryTest, rangeBounds)
     std::array<uint8_t, SizeInBytes> tempMemory{};
     std::array<uint8_t, SizeInBytes> tempMemory2{};
 
+    uint8_t rollingData = 0;
     for (size_t i = 0; i < SizeInBytes; i++)
     {
-        tempMemory[i] = i;
+        tempMemory[i] = rollingData;
+        rollingData++;
     }
-    eeprom.write(0, tempMemory.data(), SizeInBytes + 8); // range bound violation
-    eeprom.read(0, tempMemory2.data(), SizeInBytes);
 
+    // range bound violation, content should stay uninitialized
+    EXPECT_THROW(eeprom.write(0, tempMemory.data(), SizeInBytes + 1), std::runtime_error);
+    eeprom.read(0, tempMemory2.data(), SizeInBytes);
     for (size_t i = 0; i < SizeInBytes; i++)
     {
-        EXPECT_EQ(tempMemory2[i], 0xFF);
+        ASSERT_EQ(tempMemory2[i], 0xFF);
     }
 
     std::array<uint8_t, SizeInBytes> pattern{};
@@ -65,11 +70,12 @@ TEST_F(FakeMemoryTest, rangeBounds)
     tempMemory2 = pattern;
 
     eeprom.write(0, tempMemory.data(), SizeInBytes);
-    eeprom.read(0, tempMemory2.data(), SizeInBytes + 8); // range bound violation
-    EXPECT_EQ(tempMemory2, pattern);
+    // range bound violation, nothing should be read
+    EXPECT_THROW(eeprom.read(0, tempMemory2.data(), SizeInBytes + 1), std::runtime_error);
+    ASSERT_EQ(tempMemory2, pattern);
 
     eeprom.read(0, tempMemory2.data(), SizeInBytes);
-    EXPECT_EQ(tempMemory, tempMemory2);
+    ASSERT_EQ(tempMemory, tempMemory2);
 };
 
 } // namespace
