@@ -37,7 +37,7 @@ Default <= Max sanity checking.
 
 ```cpp
 #pragma once
-#include <string_view>
+#include "parameter_manager/ParameterManager.hpp"
 
 namespace FirmwareSettings
 {
@@ -61,12 +61,12 @@ using ParameterManager = settings::ParameterManager<EntryArray.size(), EntryArra
 }
 ```
 
-Now we instantiate the settings classes
+Now we instantiate the settings classes in a .cpp/.cxx file:
 
 ```cpp
-#include "parameter_manager/SettingsContainer.hpp"
 #include "parameter_manager/ParameterManager.hpp"
 #include <i2c-drivers/24lcxx.hpp>
+
 Eeprom24LC64 eeprom (/* your eeprom i2c settings */); 
 
 FirmwareSettings::Container settingsContainer;
