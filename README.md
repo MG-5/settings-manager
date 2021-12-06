@@ -52,6 +52,8 @@ namespace FirmwareSettings
 constexpr std::string_view CarMass = "car mass";
 constexpr std::string_view CarWheelRadius = "car wheel radius";
 constexpr std::string_view MotorMagnetCount = "motor magnet count";
+constexpr std::string_view DeviceAddress = "adress of device (integer)";
+constexpr std::string_view IsServoEnabled = "servo enable (boolean)";
 
 // declare our EntryArray with inline keyword is needed to get rid of linker errors and compiler warnings
 // otherwise C++ re-declaring it for every time it is included
@@ -62,8 +64,8 @@ inline constexpr std::array EntryArray = {
     settings::SettingsEntry{0.001, 2.5, 10.0, CarMass},           //
     settings::SettingsEntry{0.001, 0.05, 10.0, CarWheelRadius},   //
     settings::SettingsEntry{2.0, 24.0 , 100.0, MotorMagnetCount}, //
-    settings::SettingsEntry{0, 0x42 , 0xFFFF, DeviceAdress, settings::VariableType::integerType}, //
-    settings::SettingsEntry{0, 1 , 1, isServoEnabled, settings::VariableType::booleanType}, //
+    settings::SettingsEntry{0, 0x42 , 0xFFFF, DeviceAddress, settings::VariableType::integerType}, //
+    settings::SettingsEntry{0, 1 , 1, IsServoEnabled, settings::VariableType::booleanType}, //
 };
 using Container = settings::SettingsContainer<EntryArray.size(), EntryArray>;
 using IO = settings::SettingsIO<EntryArray.size(), EntryArray>;
