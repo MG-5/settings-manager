@@ -53,7 +53,9 @@ TEST_F(SettingsContainerTest, existanceChecks)
     static_assert(UnknownName != Entry1);
     static_assert(UnknownName != Entry2);
     static_assert(UnknownName != Entry3);
-    static_assert(TestSettings::EntryArray.size() == 3);
+    static_assert(UnknownName != EntryBoolean);
+    static_assert(UnknownName != EntryInteger);
+    static_assert(TestSettings::EntryArray.size() == 5);
 
     EXPECT_THROW(a = settingsContainer.getValue(UnknownName), std::runtime_error);
     EXPECT_THROW(settingsContainer.setValue(UnknownName, 0), std::runtime_error);
@@ -62,6 +64,8 @@ TEST_F(SettingsContainerTest, existanceChecks)
     EXPECT_TRUE(settingsContainer.doesSettingExist(Entry1));
     EXPECT_TRUE(settingsContainer.doesSettingExist(Entry2));
     EXPECT_TRUE(settingsContainer.doesSettingExist(Entry3));
+    EXPECT_TRUE(settingsContainer.doesSettingExist(EntryBoolean));
+    EXPECT_TRUE(settingsContainer.doesSettingExist(EntryInteger));
 }
 
 TEST_F(SettingsContainerTest, setValues)
@@ -70,32 +74,44 @@ TEST_F(SettingsContainerTest, setValues)
     EXPECT_TRUE(settingsContainer.setValue(Entry1, Entry1_max));
     EXPECT_TRUE(settingsContainer.setValue(Entry2, Entry2_max));
     EXPECT_TRUE(settingsContainer.setValue(Entry3, Entry3_max));
+    EXPECT_TRUE(settingsContainer.setValue(EntryBoolean, EntryBoolean_max));
+    EXPECT_TRUE(settingsContainer.setValue(EntryInteger, EntryInteger_max));
 
     EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry1), Entry1_max);
     EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry2), Entry2_max);
     EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry3), Entry3_max);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(EntryBoolean), EntryBoolean_max);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(EntryInteger), EntryInteger_max);
 
     EXPECT_TRUE(settingsContainer.setValue(Entry1, Entry1_min));
     EXPECT_TRUE(settingsContainer.setValue(Entry2, Entry2_min));
     EXPECT_TRUE(settingsContainer.setValue(Entry3, Entry3_min));
+    EXPECT_TRUE(settingsContainer.setValue(EntryBoolean, EntryBoolean_min));
+    EXPECT_TRUE(settingsContainer.setValue(EntryInteger, EntryInteger_min));
 
     EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry1), Entry1_min);
     EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry2), Entry2_min);
     EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry3), Entry3_min);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(EntryBoolean), EntryBoolean_min);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(EntryInteger), EntryInteger_min);
 
     EXPECT_TRUE(settingsContainer.setValue<Entry1>(Entry1_default));
     EXPECT_TRUE(settingsContainer.setValue<Entry2>(Entry2_default));
     EXPECT_TRUE(settingsContainer.setValue<Entry3>(Entry3_default));
+    EXPECT_TRUE(settingsContainer.setValue<EntryBoolean>(EntryBoolean_default));
+    EXPECT_TRUE(settingsContainer.setValue<EntryInteger>(EntryInteger_default));
 
     EXPECT_FLOAT_EQ(settingsContainer.getValue<Entry1>(), Entry1_default);
     EXPECT_FLOAT_EQ(settingsContainer.getValue<Entry2>(), Entry2_default);
     EXPECT_FLOAT_EQ(settingsContainer.getValue<Entry3>(), Entry3_default);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue<EntryBoolean>(), EntryBoolean_default);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue<EntryInteger>(), EntryInteger_default);
 
     static constexpr auto entry1Index = Container::getIndex<Entry1>();
-    EXPECT_FALSE(settingsContainer.setValue(Entry1, Entry1_min-1));
-    EXPECT_FALSE(settingsContainer.setValue(Entry1, Entry1_max+1));
-    EXPECT_FALSE(settingsContainer.setValue(entry1Index, Entry1_min-1));
-    EXPECT_FALSE(settingsContainer.setValue(entry1Index, Entry1_max+1));
+    EXPECT_FALSE(settingsContainer.setValue(Entry1, Entry1_min - 1));
+    EXPECT_FALSE(settingsContainer.setValue(Entry1, Entry1_max + 1));
+    EXPECT_FALSE(settingsContainer.setValue(entry1Index, Entry1_min - 1));
+    EXPECT_FALSE(settingsContainer.setValue(entry1Index, Entry1_max + 1));
 }
 
 TEST_F(SettingsContainerTest, setGetValuesByIndex)
