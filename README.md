@@ -65,7 +65,7 @@ inline constexpr std::array EntryArray = {
     settings::SettingsEntry{0.001, 0.05, 10.0, CarWheelRadius},   //
     settings::SettingsEntry{2.0, 24.0 , 100.0, MotorMagnetCount}, //
     settings::SettingsEntry{0, 0x42 , 0xFFFF, DeviceAddress, settings::VariableType::integerType}, //
-    settings::SettingsEntry{0, 1 , 1, IsServoEnabled, settings::VariableType::booleanType}, //
+    settings::SettingsEntry{true, IsServoEnabled}, //
 };
 using Container = settings::SettingsContainer<EntryArray.size(), EntryArray>;
 using IO = settings::SettingsIO<EntryArray.size(), EntryArray>;

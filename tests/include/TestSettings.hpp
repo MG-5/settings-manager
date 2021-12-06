@@ -1,7 +1,7 @@
 #pragma once
 
-#include "parameter_manager/SettingsContainer.hpp"
 #include "parameter_manager/ParameterManager.hpp"
+#include "parameter_manager/SettingsContainer.hpp"
 
 namespace TestSettings
 {
@@ -24,9 +24,7 @@ constexpr settings::SettingsValue_t Entry3_min = 3;
 constexpr settings::SettingsValue_t Entry3_default = 30;
 constexpr settings::SettingsValue_t Entry3_max = 300;
 
-constexpr settings::SettingsValue_t EntryBoolean_min = 0;
-constexpr settings::SettingsValue_t EntryBoolean_default = 1;
-constexpr settings::SettingsValue_t EntryBoolean_max = 1;
+constexpr bool EntryBoolean_default = true;
 
 constexpr settings::SettingsValue_t EntryInteger_min = 0;
 constexpr settings::SettingsValue_t EntryInteger_default = 0x42;
@@ -36,8 +34,7 @@ constexpr std::array EntryArray = {
     settings::SettingsEntry{Entry1_min, Entry1_default, Entry1_max, Entry1},
     settings::SettingsEntry{Entry2_min, Entry2_default, Entry2_max, Entry2},
     settings::SettingsEntry{Entry3_min, Entry3_default, Entry3_max, Entry3},
-    settings::SettingsEntry{EntryBoolean_min, EntryBoolean_default, EntryBoolean_max, EntryBoolean,
-                            settings::VariableType::booleanType},
+    settings::SettingsEntry{EntryBoolean_default, EntryBoolean},
     settings::SettingsEntry{EntryInteger_min, EntryInteger_default, EntryInteger_max, EntryInteger,
                             settings::VariableType::integerType},
 };

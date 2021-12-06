@@ -33,6 +33,12 @@ public:
     {
     }
 
+    constexpr SettingsEntry(const bool defaultBoolValue, std::string_view name)
+        : minValue{0}, defaultValue{defaultBoolValue}, maxValue{1}, name{name},
+          variableType{VariableType::booleanType}
+    {
+    }
+
     constexpr bool isValid() const
     {
         return !(minValue > maxValue || defaultValue > maxValue || defaultValue < minValue);
