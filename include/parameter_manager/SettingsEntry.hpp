@@ -34,7 +34,7 @@ public:
     }
 
     constexpr SettingsEntry(const bool defaultBoolValue, std::string_view name)
-        : minValue{0}, defaultValue{defaultBoolValue}, maxValue{1}, name{name},
+        : minValue{0}, defaultValue{defaultBoolValue ? 1.0f : 0.0f}, maxValue{1}, name{name},
           variableType{VariableType::booleanType}
     {
     }
