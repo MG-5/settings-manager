@@ -119,9 +119,31 @@ public:
     }
 
     /**
+     * Get the values type by name/index - only relevant for UAVCAN's param server.
+     */
+    template <const std::string_view &name>
+    [[nodiscard]] VariableType getVariableType() const
+    {
+        constexpr size_t Index = getIndex<name>();
+        return getVariableType(Index);
+    }
+
+    [[nodiscard]] VariableType getVariableType(std::string_view name) const
+    {
+        return getVariableType(getIndex(name));
+    }
+
+    [[nodiscard]] VariableType getVariableType(size_t index) const
+    {
+        SafeAssert(index < SettingsCount);
+        return entryArray[index].variableType;
+    }
+
+    /**
      * Retrieves a setting index.
      * Name templated overload determines setting existence at compile time. Zero cost.
-     * String overload ASSERTS setting existence. String search on every usage. Asserts setting's existence!
+     * String overload ASSERTS setting existence. String search on every usage. Asserts setting's
+     * existence!
      */
     [[nodiscard]] size_t getIndex(std::string_view name) const
     {
@@ -155,7 +177,6 @@ public:
         return entryArray;
     }
 
-
     [[nodiscard]] bool doesSettingExist(std::string_view name) const
     {
         const auto [exists, index] = getIndex_Aux(name);
@@ -164,15 +185,9 @@ public:
 
     bool operator==(const SettingsContainer<SettingsCount, entryArray> &other) const
     {
-        for (size_t i = 0; i < SettingsCount; ++i)
-        {
-            if (containerArray[i] != other.containerArray[i])
-            {
-                return false;
-            }
-        }
-        return true;
+        return containerArray == other.containerArray;
     }
+
     bool operator!=(const SettingsContainer<SettingsCount, entryArray> &other) const
     {
         return !((*this) == other);

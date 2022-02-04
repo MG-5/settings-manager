@@ -33,33 +33,78 @@ public:
 
     void assignParamValue(const Name &name, const Value &value) override
     {
-        if (settingContainer.doesSettingExist(name.c_str()))
+        if (!settingContainer.doesSettingExist(name.c_str()))
+            return;
+
+        if (value.is(Value::Tag::boolean_value))
         {
-            if (value.is(Value::Tag::real_value))
-            {
-                settingContainer.setValue(
-                    name.c_str(), *value.as<uavcan::protocol::param::Value::Tag::real_value>());
-            }
+            settingContainer.setValue(
+                name.c_str(), *value.as<uavcan::protocol::param::Value::Tag::boolean_value>());
+        }
+        else if (value.is(Value::Tag::integer_value))
+        {
+            settingContainer.setValue(
+                name.c_str(), *value.as<uavcan::protocol::param::Value::Tag::integer_value>());
+        }
+        else if (value.is(Value::Tag::real_value))
+        {
+            settingContainer.setValue(name.c_str(),
+                                      *value.as<uavcan::protocol::param::Value::Tag::real_value>());
         }
     }
 
     void readParamValue(const Name &name, Value &outValue) const override
     {
-        if (settingContainer.doesSettingExist(name.c_str()))
+        if (!settingContainer.doesSettingExist(name.c_str()))
+            return;
+
+        const auto index = settingContainer.getIndex(name.c_str());
+        const auto settingValue = settingContainer.getValue(index);
+
+        switch (settingContainer.getVariableType(index))
         {
-            outValue.to<Value::Tag::real_value>() = settingContainer.getValue(name.c_str());
+        case VariableType::booleanType:
+            outValue.to<Value::Tag::boolean_value>() = settingValue;
+            break;
+
+        case VariableType::integerType:
+            outValue.to<Value::Tag::integer_value>() = settingValue;
+            break;
+
+        case VariableType::realType:
+        default:
+            outValue.to<Value::Tag::real_value>() = settingValue;
+            break;
         }
     }
 
     void readParamDefaultMaxMin(const Name &name, Value &outDef, NumericValue &outMax,
                                 NumericValue &outMin) const override
     {
-        if (settingContainer.doesSettingExist(name.c_str()))
+        if (!settingContainer.doesSettingExist(name.c_str()))
+            return;
+
+        const auto index = settingContainer.getIndex(name.c_str());
+        const auto entryVariableType = settingContainer.getVariableType(index);
+
+        switch (entryVariableType)
         {
-            const auto index = settingContainer.getIndex(name.c_str());
+        case VariableType::booleanType:
+            outDef.to<Value::Tag::boolean_value>() = (settingContainer.getDefaultValue(index) != 0);
+            break;
+
+        case VariableType::integerType:
+            outMin.to<NumericValue::Tag::integer_value>() = settingContainer.getMinValue(index);
+            outDef.to<Value::Tag::integer_value>() = settingContainer.getDefaultValue(index);
+            outMax.to<NumericValue::Tag::integer_value>() = settingContainer.getMaxValue(index);
+            break;
+
+        default:
+        case VariableType::realType:
             outMin.to<NumericValue::Tag::real_value>() = settingContainer.getMinValue(index);
             outDef.to<Value::Tag::real_value>() = settingContainer.getDefaultValue(index);
             outMax.to<NumericValue::Tag::real_value>() = settingContainer.getMaxValue(index);
+            break;
         }
     }
 

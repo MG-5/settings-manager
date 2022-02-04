@@ -16,19 +16,27 @@ Exports following libraries:
 
 - parameter_manager
 
+----
 ### Overview / Terminology
 
 A setting has four static (compiled in) and one dynamic property.
 
-- Name (static)
-- Minimum value (static)
-- Default value (static)
-- Maximum value (static)
-- Current value (dynamic)
+static:
+- Name
+- Minimum value
+- Default value
+- Maximum value
+
+dynamic:
+- Current value
 
 EEPROM will only save dynamic content but will hash the string names to detect static settings changes. Min / Max
-changes may cause settings to be reset to default when their newly loaded value is out of bounds.
+changes may cause settings to be reset to default when their newly loaded value is out of bounds. The internal
+type representation of Current value is always float. But you can choose the type (real, integer, boolean),
+which should be presented in UAVCAN's parameter server. So you can change in GUI tool for instance values
+as integer values instead of point numbers, even if it is internally saved as float.
 
+----
 ### How to
 
 You start by creating a header file for your static content (name, min, max, default). Everything MUST be constexpr here
@@ -44,6 +52,8 @@ namespace FirmwareSettings
 constexpr std::string_view CarMass = "car mass";
 constexpr std::string_view CarWheelRadius = "car wheel radius";
 constexpr std::string_view MotorMagnetCount = "motor magnet count";
+constexpr std::string_view DeviceAddress = "adress of device (integer)";
+constexpr std::string_view IsServoEnabled = "servo enable (boolean)";
 
 // declare our EntryArray with inline keyword is needed to get rid of linker errors and compiler warnings
 // otherwise C++ re-declaring it for every time it is included
@@ -54,6 +64,8 @@ inline constexpr std::array EntryArray = {
     settings::SettingsEntry{0.001, 2.5, 10.0, CarMass},           //
     settings::SettingsEntry{0.001, 0.05, 10.0, CarWheelRadius},   //
     settings::SettingsEntry{2.0, 24.0 , 100.0, MotorMagnetCount}, //
+    settings::SettingsEntry{0, 0x42 , 0xFFFF, DeviceAddress, settings::VariableType::integerType}, //
+    settings::SettingsEntry{true, IsServoEnabled}, //
 };
 using Container = settings::SettingsContainer<EntryArray.size(), EntryArray>;
 using IO = settings::SettingsIO<EntryArray.size(), EntryArray>;
@@ -67,7 +79,7 @@ Now we instantiate the settings classes in a .cpp/.cxx file:
 #include "parameter_manager/ParameterManager.hpp"
 #include <i2c-drivers/24lcxx.hpp>
 
-Eeprom24LC64 eeprom (/* your eeprom i2c settings */); 
+Eeprom24LC64 eeprom (/* your eeprom i2c settings */);
 
 FirmwareSettings::Container settingsContainer;
 FirmwareSettings::IO settingsIO(eeprom, settingsContainer);
@@ -75,9 +87,10 @@ FirmwareSettings::ParameterManager parameterManager(settingsContainer, settingsI
 ```
 
 *SettingsContainer* allows you to lookup settings. *SettingsIO* handles writing settings to EEPROM.
-*ParameterManager* integrates settings with UAVCAN's *GetSet* configuration system.  
+*ParameterManager* integrates settings with UAVCAN's *GetSet* configuration system.
 **Be aware that setting's values can change in runtime!** see section down below for efficient working with settings.
 
+----
 ### Settings Lookup
 
 You are free to the normal *settingsContainer.getValue(SettingName)* function but be aware that this will search through
@@ -89,7 +102,7 @@ SettingsContainer* allows you to look up a setting at compile time:
 // this will do a bunch of string search every time you want to retrieve the setting
 float myVal = settingsContainer.getValue(FirmwareSettings::CarMass);
 
-// way quicker 
+// way quicker
 float myVal2 = settingsContainer.getValue<FirmwareSettings::CarMass>();
 
 // same is also true for the setValue functions
