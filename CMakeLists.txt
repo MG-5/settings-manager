@@ -23,10 +23,13 @@ if (${CMAKE_TESTING_ENABLED})
             tests/src/SettingsContainerTest.cxx
             tests/src/SettingsEntryTest.cxx
             tests/src/SettingsIOTest.cxx
+            tests/src/SettingsUserTest.cxx
             tests/src/ParameterManagerTest.cxx
             )
+
     target_include_directories(${PROJECT_NAME}_test PRIVATE
             tests/include)
+
     target_link_libraries(${PROJECT_NAME}_test PRIVATE
             ${GTEST_LDFLAGS}
             ${GMOCK_LDFLAGS}
@@ -34,6 +37,7 @@ if (${CMAKE_TESTING_ENABLED})
             i2c-drivers
             gcov
             ${PROJECT_NAME})
+
     target_link_options(${PROJECT_NAME}_test PRIVATE --coverage)
     target_compile_options(${PROJECT_NAME}_test PRIVATE ${GTEST_CFLAGS} ${GMOCK_CFLAGS} --coverage)
     add_test(${PROJECT_NAME}_test ${PROJECT_NAME}_test)

@@ -111,3 +111,37 @@ float myVal2 = settingsContainer.getValue<FirmwareSettings::CarMass>();
 If you are asking yourself why going through all this trouble is worth it, consider the alternative with hard-coded
 indices. Any small change in the settings order will cause nasty bugs where wrong values are delivered to your code.
 This approach will make it much harder to make such mistakes.
+
+All classes using settings should inherit from here and implement the `onSettingsUpdate()` function. This function is guaranteed to be called at least once when the EEPROM is finished initializing (your class must be contstructed before that of course). When called before EEPROM is ready you will only get default values.
+Will be called when someone updates the value by calling the static `notifySettingsUpdate()` function.
+
+Here is an example .hpp file related to example in **How To**:
+
+```cpp
+#pragma once
+
+#include "settings/SettingsContainer.hpp"
+#include "settings/SettingsUser.hpp"
+#include <units/si/mass.hpp>
+#include <units/si/length.hpp>
+
+class Motor : public settings::SettingsUser
+{
+public:
+    Motor(settings::SettingsContainer &settings): settings(settings);
+
+    void onSettingsUpdate() override
+    {
+        carMass = settings.getValue<units::si::Mass>(settings::CarMass);
+        carWheelRadius = settings.getValue<units::si::Length>(settings::CarWheelRadius);
+        motorMagnetCount = settings.getValue(settings::MotorMagnetCount);
+    }
+
+private:
+    settings::SettingsContainer &settings;
+
+    units::si::Mass carMass{0.0_kg};
+    units::si:Length carWheelRadius
+    float motorMagnetCount
+}
+```
