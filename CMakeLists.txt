@@ -2,16 +2,13 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0048 NEW)
 
 project(parameter_manager LANGUAGES CXX C ASM)
-set(CMAKE_CXX_STANDARD 17)
 
 add_library(${PROJECT_NAME} INTERFACE)
+target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 target_include_directories(${PROJECT_NAME} INTERFACE
         include)
 target_link_libraries(${PROJECT_NAME} INTERFACE core i2c-drivers bus_node_base)
 
-if (NOT DEFINED isEmbeddedCompiler)
-    message(FATAL_ERROR "Required variable isEmbeddedCompiler is not in scope")
-endif ()
 if (${CMAKE_TESTING_ENABLED})
     find_package(PkgConfig)
     pkg_search_module(GTEST REQUIRED gtest)
@@ -26,7 +23,7 @@ if (${CMAKE_TESTING_ENABLED})
             tests/src/SettingsUserTest.cxx
             tests/src/ParameterManagerTest.cxx
             )
-
+    target_compile_features(${PROJECT_NAME}_test PUBLIC cxx_std_17)
     target_include_directories(${PROJECT_NAME}_test PRIVATE
             tests/include)
 
@@ -45,6 +42,7 @@ if (${CMAKE_TESTING_ENABLED})
     function(DEFINE_WILL_FAIL_TESTS Name)
         add_executable(${PROJECT_NAME}_${Name}
                 tests/src/will-fail/${Name}.cpp)
+        target_compile_features(${PROJECT_NAME}_test PUBLIC cxx_std_17)
 
         target_include_directories(${PROJECT_NAME}_${Name} PRIVATE
                 tests/include)
