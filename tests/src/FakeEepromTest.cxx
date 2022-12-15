@@ -1,5 +1,4 @@
-#include "fake/i2c-drivers/FakeEeprom.hpp"
-#include "stub/BusAccessor.hpp"
+#include "fake/FakeEeprom.hpp"
 #include <exception>
 #include <gtest/gtest.h>
 
@@ -10,12 +9,9 @@ constexpr auto SizeInBytes = FakeEeprom::getSizeInBytes();
 class FakeEepromTest : public ::testing::Test
 {
 protected:
-    FakeEepromTest() : accessor(), eeprom(accessor)
-    {
-    }
+    FakeEepromTest() = default;
 
-    BusAccessorStub accessor;
-    FakeEeprom24LC64 eeprom;
+    FakeEeprom eeprom{};
 };
 
 TEST_F(FakeEepromTest, readDefaultEeprom)

@@ -1,8 +1,9 @@
 #include "settings-manager/SettingsUser.hpp"
-#include "TestSettings.hpp"
-#include "fake/i2c-drivers/FakeEeprom.hpp"
 #include "settings-manager/SettingsIO.hpp"
-#include "stub/BusAccessor.hpp"
+
+#include "TestSettings.hpp"
+#include "fake/FakeEeprom.hpp"
+
 #include <gtest/gtest.h>
 
 namespace
@@ -12,14 +13,11 @@ using namespace settings;
 class SettingsIOTest
 {
 public:
-    SettingsIOTest() : eeprom(accessor), settingsIo(eeprom, settingsContainer)
-    {
-    }
+    SettingsIOTest() = default;
 
-    BusAccessorStub accessor;
-    FakeEeprom24LC64 eeprom;
-    TestSettings::Container settingsContainer;
-    TestSettings::IO settingsIo;
+    FakeEeprom eeprom{};
+    TestSettings::Container settingsContainer{};
+    TestSettings::IO settingsIo{eeprom, settingsContainer};
 };
 
 class SettingsUserTest : public settings::SettingsUser, public ::testing::Test

@@ -1,6 +1,5 @@
 #include "TestSettings.hpp"
-#include "fake/i2c-drivers/Fake24LC64.hpp"
-#include "stub/BusAccessor.hpp"
+#include "fake/FakeEeprom.hpp"
 #include <array>
 #include <core/hash.hpp>
 #include <gtest/gtest.h>
@@ -13,16 +12,15 @@ using TestSettings::IO;
 class SettingsIOTest : public ::testing::Test
 {
 protected:
-    SettingsIOTest() : eeprom(accessor), settingsIo(eeprom, settingsContainer)
+    SettingsIOTest()
     {
         // placement information of IO::EepromContent members
         loadEepromContentOffsets();
     }
 
-    BusAccessorStub accessor;
-    FakeEeprom24LC64 eeprom;
-    Container settingsContainer;
-    IO settingsIo;
+    FakeEeprom eeprom{};
+    Container settingsContainer{};
+    IO settingsIo{eeprom, settingsContainer};
 
     IO::EepromContent temporaryContent;
 
@@ -171,10 +169,10 @@ TEST_F(SettingsIOTest, saveSettings)
 
 TEST_F(SettingsIOTest, EepromContentEquality)
 {
-    ASSERT_EQ(temporaryContent,temporaryContent);
+    ASSERT_EQ(temporaryContent, temporaryContent);
     auto other = temporaryContent;
     other.settingsContainer.setValue(TestSettings::Entry1, TestSettings::Entry1_min);
-    ASSERT_NE(temporaryContent,other);
+    ASSERT_NE(temporaryContent, other);
 }
 
 TEST_F(SettingsIOTest, BoundsCheckFailOnLoad)
@@ -212,6 +210,5 @@ TEST_F(SettingsIOTest, BoundsCheckFailOnLoad)
     ASSERT_TRUE(settingsIo.loadSettings());
 
     // check if reset to default worked
-    ASSERT_EQ(settingsContainer.getValue(TestSettings::Entry1),
-              TestSettings::Entry1_default);
+    ASSERT_EQ(settingsContainer.getValue(TestSettings::Entry1), TestSettings::Entry1_default);
 }

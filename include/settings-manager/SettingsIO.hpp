@@ -1,8 +1,9 @@
 #pragma once
 
 #include "settings-manager/SettingsContainer.hpp"
+
 #include <core/hash.hpp>
-#include <i2c-drivers/24lcxx.hpp>
+#include <eeprom-drivers/EepromBase.hpp>
 
 namespace settings
 {
@@ -13,11 +14,12 @@ namespace settings
  * @tparam SettingsCount
  * @tparam entryArray
  */
-template <size_t SettingsCount, const std::array<SettingsEntry, SettingsCount> &entryArray>
+template <size_t SettingsCount, const std::array<SettingsEntry, SettingsCount> &entryArray,
+          class MemoryType>
 class SettingsIO
 {
 public:
-    SettingsIO(Eeprom24LC64 &eeprom, SettingsContainer<SettingsCount, entryArray> &settings)
+    SettingsIO(MemoryType &eeprom, SettingsContainer<SettingsCount, entryArray> &settings)
         : eeprom(eeprom),    //
           settings(settings) //
     {
@@ -125,7 +127,7 @@ public:
     }
 
 private:
-    Eeprom24LC64 &eeprom;
+    MemoryType &eeprom;
     SettingsContainer<SettingsCount, entryArray> &settings;
     EepromContent rawContent;
 
