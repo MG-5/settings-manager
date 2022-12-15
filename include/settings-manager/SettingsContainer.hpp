@@ -6,12 +6,10 @@
 namespace settings
 {
 
-/**
- * Searching, setting, getting settings values.
- * Does compiletime validation of static settings content.
- * @tparam SettingsCount
- * @tparam entryArray
- */
+/// Searching, setting, getting settings values.
+/// Does compiletime validation of static settings content.
+/// @tparam SettingsCount
+/// @tparam entryArray
 template <size_t SettingsCount, const std::array<SettingsEntry, SettingsCount> &entryArray>
 class SettingsContainer
 {
@@ -24,14 +22,11 @@ public:
         // TODO hookup settings IO and wait until loaded
     };
 
-    /**
-     * Retrieves a settings value by name / index.
-     * Name templated overload determines setting existence at compile time. Zero lookup cost.
-     * String overload ASSERTS setting existence. String search on every lookup.
-     * Index lookup ASSERTS index validity. Zero lookup cost.
-     *
-     * @tparam T preferred return type, consider using util's unit system
-     */
+    /// Retrieves a settings value by name / index.
+    /// Name templated overload determines setting existence at compile time. Zero lookup cost.
+    /// String overload ASSERTS setting existence. String search on every lookup.
+    /// Index lookup ASSERTS index validity. Zero lookup cost.
+    /// @tparam T preferred return type, consider using util's unit system
     template <const std::string_view &name, typename T = SettingsValue_t>
     [[nodiscard]] T getValue() const
     {
@@ -60,12 +55,10 @@ public:
         }
     }
 
-    /**
-     * Returns the setting's minimum / default / maximum value. Asserts index bounds!
-     * Consider using in combination with getIndex().
-     * @param index index of setting
-     * @return
-     */
+    /// Returns the setting's minimum / default / maximum value. Asserts index bounds!
+    /// Consider using in combination with getIndex().
+    /// @param index index of setting
+    /// @return
     [[nodiscard]] SettingsValue_t getMinValue(size_t index)
     {
         SafeAssert(index < SettingsCount);
@@ -84,14 +77,11 @@ public:
         return entryArray[index].defaultValue;
     }
 
-    /**
-     * Sets new value by name / index.
-     * Name templated overload determines setting existence at compile time. Zero cost.
-     * String overload ASSERTS setting existence. String search on every usage.
-     * Index lookup ASSERTS index validity. Zero cost.
-     *
-     * @return true on success, false if min / max bounds are violated
-     */
+    /// Sets new value by name / index.
+    /// Name templated overload determines setting existence at compile time. Zero cost.
+    /// String overload ASSERTS setting existence. String search on every usage.
+    /// Index lookup ASSERTS index validity. Zero cost.
+    /// @return true on success, false if min / max bounds are violated
     template <const std::string_view &name>
     bool setValue(const SettingsValue_t newValue)
     {
@@ -118,9 +108,7 @@ public:
         return true;
     }
 
-    /**
-     * Get the values type by name/index - only relevant for UAVCAN's param server.
-     */
+    /// Get the values type by name/index - only relevant for UAVCAN's param server.
     template <const std::string_view &name>
     [[nodiscard]] VariableType getVariableType() const
     {
@@ -139,12 +127,10 @@ public:
         return entryArray[index].variableType;
     }
 
-    /**
-     * Retrieves a setting index.
-     * Name templated overload determines setting existence at compile time. Zero cost.
-     * String overload ASSERTS setting existence. String search on every usage. Asserts setting's
-     * existence!
-     */
+    /// Retrieves a setting index.
+    /// Name templated overload determines setting existence at compile time. Zero cost.
+    /// String overload ASSERTS setting existence. String search on every usage. Asserts setting's
+    /// existence!
     [[nodiscard]] size_t getIndex(std::string_view name) const
     {
         const std::tuple<bool, size_t> ret = getIndex_Aux(name);

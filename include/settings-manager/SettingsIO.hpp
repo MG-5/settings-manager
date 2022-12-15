@@ -8,12 +8,9 @@
 namespace settings
 {
 
-/**
- * Handles saving non-static settings content to eeprom
- *
- * @tparam SettingsCount
- * @tparam entryArray
- */
+/// Handles saving non-static settings content to eeprom
+/// @tparam SettingsCount
+/// @tparam entryArray
 template <size_t SettingsCount, const std::array<SettingsEntry, SettingsCount> &entryArray,
           class MemoryType>
 class SettingsIO
@@ -26,11 +23,9 @@ public:
     }
     virtual ~SettingsIO() = default;
 
-    /**
-     * Loads settings from EEPROM. Blocking. Updates SettingsContainer with read values on success.
-     * Discards EEPROM content and writes defaults on failure.
-     * @return true on success, false otherwise
-     */
+    /// Loads settings from EEPROM. Blocking. Updates SettingsContainer with read values on success.
+    /// Discards EEPROM content and writes defaults on failure.
+    /// @return true on success, false otherwise
     virtual bool loadSettings()
     {
         eeprom.read(MemoryOffset, reinterpret_cast<uint8_t *>(&rawContent), sizeof(EepromContent));
@@ -69,9 +64,7 @@ public:
         return true;
     }
 
-    /**
-     * Writes settings to EEPROM. Blocking
-     */
+    /// Writes settings to EEPROM. Blocking
     virtual void saveSettings()
     {
         rawContent.magicString = Signature;
