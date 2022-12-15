@@ -1,6 +1,5 @@
 #pragma once
 
-#include "settings-manager/ParameterManager.hpp"
 #include "settings-manager/SettingsContainer.hpp"
 
 namespace TestSettings
@@ -40,5 +39,4 @@ constexpr std::array EntryArray = {
 };
 using Container = settings::SettingsContainer<EntryArray.size(), EntryArray>;
 using IO = settings::SettingsIO<EntryArray.size(), EntryArray>;
-using ParameterManager = settings::ParameterManager<EntryArray.size(), EntryArray>;
 } // namespace TestSettings
