@@ -1,7 +1,7 @@
-#include "parameter_manager/SettingsUser.hpp"
+#include "settings-manager/SettingsUser.hpp"
 #include "TestSettings.hpp"
-#include "fake/i2c-drivers/Fake24LC64.hpp"
-#include "parameter_manager/SettingsIO.hpp"
+#include "fake/i2c-drivers/FakeEeprom.hpp"
+#include "settings-manager/SettingsIO.hpp"
 #include "stub/BusAccessor.hpp"
 #include <gtest/gtest.h>
 

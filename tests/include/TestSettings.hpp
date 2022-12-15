@@ -1,7 +1,7 @@
 #pragma once
 
-#include "parameter_manager/ParameterManager.hpp"
-#include "parameter_manager/SettingsContainer.hpp"
+#include "settings-manager/ParameterManager.hpp"
+#include "settings-manager/SettingsContainer.hpp"
 
 namespace TestSettings
 {

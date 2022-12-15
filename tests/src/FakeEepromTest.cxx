@@ -1,16 +1,16 @@
-#include "fake/i2c-drivers/Fake24LC64.hpp"
+#include "fake/i2c-drivers/FakeEeprom.hpp"
 #include "stub/BusAccessor.hpp"
-#include <gtest/gtest.h>
 #include <exception>
+#include <gtest/gtest.h>
 
 namespace
 {
-constexpr auto SizeInBytes = FakeEeprom24LC64::getSizeInBytes();
+constexpr auto SizeInBytes = FakeEeprom::getSizeInBytes();
 
-class FakeMemoryTest : public ::testing::Test
+class FakeEepromTest : public ::testing::Test
 {
 protected:
-    FakeMemoryTest() : accessor(), eeprom(accessor)
+    FakeEepromTest() : accessor(), eeprom(accessor)
     {
     }
 
@@ -18,7 +18,7 @@ protected:
     FakeEeprom24LC64 eeprom;
 };
 
-TEST_F(FakeMemoryTest, readDefaultEeprom)
+TEST_F(FakeEepromTest, readDefaultEeprom)
 {
     std::array<uint8_t, SizeInBytes> tempMemory = {0};
     eeprom.read(0, tempMemory.data(), SizeInBytes);
@@ -29,7 +29,7 @@ TEST_F(FakeMemoryTest, readDefaultEeprom)
     }
 };
 
-TEST_F(FakeMemoryTest, writeRead)
+TEST_F(FakeEepromTest, writeRead)
 {
     std::array<uint8_t, SizeInBytes> tempMemory = {0};
 
@@ -45,7 +45,7 @@ TEST_F(FakeMemoryTest, writeRead)
     }
 };
 
-TEST_F(FakeMemoryTest, rangeBounds)
+TEST_F(FakeEepromTest, rangeBounds)
 {
     std::array<uint8_t, SizeInBytes> tempMemory{};
     std::array<uint8_t, SizeInBytes> tempMemory2{};

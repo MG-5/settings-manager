@@ -3,11 +3,10 @@
 #include <cstring>
 #include <i2c-drivers/24lcxx.hpp>
 
-class FakeEeprom24LC64 : public Eeprom24LC64
+class FakeEeprom : public Eeprom24LC64
 {
 public:
-    explicit FakeEeprom24LC64(i2c::IBusAccessor& accessor) : Eeprom24LC64(accessor, 0),
-          fakeMemory{0}
+    explicit FakeEeprom(i2c::IBusAccessor &accessor) : Eeprom24LC64(accessor, 0), fakeMemory{0}
     {
         fakeMemory.fill(0xFF);
     }

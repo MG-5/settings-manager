@@ -1,6 +1,6 @@
 #pragma once
 
-#include "parameter_manager/SettingsContainer.hpp"
+#include "settings-manager/SettingsContainer.hpp"
 #include <core/hash.hpp>
 #include <i2c-drivers/24lcxx.hpp>
 
@@ -99,13 +99,14 @@ public:
         __attribute__((packed)) size_t magicString = Signature;
         SettingsContainer<SettingsCount, entryArray> settingsContainer;
 
-        bool operator==(const EepromContent& other) const {
+        bool operator==(const EepromContent &other) const
+        {
             return settingsNamesHash == other.settingsNamesHash &&
                    settingsValuesHash == other.settingsValuesHash &&
-                   magicString == other.magicString &&
-                   settingsContainer == other.settingsContainer;
+                   magicString == other.magicString && settingsContainer == other.settingsContainer;
         }
-        bool operator!=(const EepromContent& other) const {
+        bool operator!=(const EepromContent &other) const
+        {
             return !((*this) == other);
         }
     };

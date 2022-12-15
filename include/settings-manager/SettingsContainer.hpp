@@ -1,5 +1,5 @@
 #pragma once
-#include "parameter_manager/SettingsEntry.hpp"
+#include "settings-manager/SettingsEntry.hpp"
 #include <core/SafeAssert.h>
 #include <tuple>
 

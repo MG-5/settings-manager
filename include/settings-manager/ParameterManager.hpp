@@ -1,7 +1,7 @@
 #pragma once
 
-#include "parameter_manager/SettingsContainer.hpp"
-#include "parameter_manager/SettingsIO.hpp"
+#include "settings-manager/SettingsContainer.hpp"
+#include "settings-manager/SettingsIO.hpp"
 #include <uavcan/protocol/param_server.hpp>
 
 /**
@@ -63,18 +63,18 @@ public:
 
         switch (settingContainer.getVariableType(index))
         {
-        case VariableType::booleanType:
-            outValue.to<Value::Tag::boolean_value>() = settingValue;
-            break;
+            case VariableType::booleanType:
+                outValue.to<Value::Tag::boolean_value>() = settingValue;
+                break;
 
-        case VariableType::integerType:
-            outValue.to<Value::Tag::integer_value>() = settingValue;
-            break;
+            case VariableType::integerType:
+                outValue.to<Value::Tag::integer_value>() = settingValue;
+                break;
 
-        case VariableType::realType:
-        default:
-            outValue.to<Value::Tag::real_value>() = settingValue;
-            break;
+            case VariableType::realType:
+            default:
+                outValue.to<Value::Tag::real_value>() = settingValue;
+                break;
         }
     }
 
@@ -89,22 +89,23 @@ public:
 
         switch (entryVariableType)
         {
-        case VariableType::booleanType:
-            outDef.to<Value::Tag::boolean_value>() = (settingContainer.getDefaultValue(index) != 0);
-            break;
+            case VariableType::booleanType:
+                outDef.to<Value::Tag::boolean_value>() =
+                    (settingContainer.getDefaultValue(index) != 0);
+                break;
 
-        case VariableType::integerType:
-            outMin.to<NumericValue::Tag::integer_value>() = settingContainer.getMinValue(index);
-            outDef.to<Value::Tag::integer_value>() = settingContainer.getDefaultValue(index);
-            outMax.to<NumericValue::Tag::integer_value>() = settingContainer.getMaxValue(index);
-            break;
+            case VariableType::integerType:
+                outMin.to<NumericValue::Tag::integer_value>() = settingContainer.getMinValue(index);
+                outDef.to<Value::Tag::integer_value>() = settingContainer.getDefaultValue(index);
+                outMax.to<NumericValue::Tag::integer_value>() = settingContainer.getMaxValue(index);
+                break;
 
-        default:
-        case VariableType::realType:
-            outMin.to<NumericValue::Tag::real_value>() = settingContainer.getMinValue(index);
-            outDef.to<Value::Tag::real_value>() = settingContainer.getDefaultValue(index);
-            outMax.to<NumericValue::Tag::real_value>() = settingContainer.getMaxValue(index);
-            break;
+            default:
+            case VariableType::realType:
+                outMin.to<NumericValue::Tag::real_value>() = settingContainer.getMinValue(index);
+                outDef.to<Value::Tag::real_value>() = settingContainer.getDefaultValue(index);
+                outMax.to<NumericValue::Tag::real_value>() = settingContainer.getMaxValue(index);
+                break;
         }
     }
 

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0048 NEW)
 
-project(parameter_manager LANGUAGES CXX C ASM)
+project(settings-manager LANGUAGES CXX C ASM)
 
 add_library(${PROJECT_NAME} INTERFACE)
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
@@ -15,7 +15,7 @@ if (${CMAKE_TESTING_ENABLED})
     pkg_search_module(GMOCK REQUIRED gmock)
 
     add_executable(${PROJECT_NAME}_test
-            tests/src/FakeMemoryTest.cxx
+            tests/src/FakeEepromTest.cxx
             tests/src/main.cxx
             tests/src/SettingsContainerTest.cxx
             tests/src/SettingsEntryTest.cxx
