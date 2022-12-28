@@ -44,7 +44,7 @@ public:
     [[nodiscard]] T getValue(size_t index) const
     {
         SafeAssert(index < SettingsCount);
-        const auto value = containerArray[index];
+        const auto value = containerArray[index].second;
         if constexpr (std::is_same<T, SettingsValue_t>::value)
         {
             return value;
@@ -104,7 +104,7 @@ public:
         {
             return false;
         }
-        containerArray[Index] = newValue;
+        containerArray[Index].second = newValue;
         return true;
     }
 
@@ -154,7 +154,7 @@ public:
     {
         for (size_t i = 0; i < SettingsCount; ++i)
         {
-            containerArray[i] = entryArray[i].defaultValue;
+            containerArray[i].second = entryArray[i].defaultValue;
         }
     }
 
@@ -180,7 +180,8 @@ public:
     }
 
 private:
-    std::array<SettingsValue_t, SettingsCount> containerArray;
+    using memoryEntry = std::pair<uint64_t, uint32_t>;
+    std::array<memoryEntry, SettingsCount> containerArray{};
 
     [[nodiscard]] static constexpr std::tuple<bool, size_t>
     getIndex_Aux(const std::string_view &name)

@@ -9,8 +9,9 @@ namespace settings
 {
 
 /// Handles saving non-static settings content to eeprom
-/// @tparam SettingsCount
-/// @tparam entryArray
+/// @tparam SettingsCount number of settings
+/// @tparam entryArray the array with size of SettingsCount - containing the setting entrys
+/// @tparam MemoryType class with read/write access to any memory like EEPROM
 template <size_t SettingsCount, const std::array<SettingsEntry, SettingsCount> &entryArray,
           class MemoryType>
 class SettingsIO
@@ -30,18 +31,21 @@ public:
     {
         eeprom.read(MemoryOffset, reinterpret_cast<uint8_t *>(&rawContent), sizeof(EepromContent));
 
-        // verify header
-        bool isValid =
-            (rawContent.magicString == Signature) &&             //
-            rawContent.settingsNamesHash == settingsNamesHash && //
-            rawContent.settingsValuesHash == hashSettingsValues(rawContent.settingsContainer);
-
-        // invalid, write sensible defaults
-        if (!isValid)
+        bool hasHeader = rawContent.magicString == Signature;
+        if (!hasHeader)
         {
+            // no valid header found, write default struct to EEPROM
             settings.resetAllToDefault();
             saveSettings();
             return false;
+        }
+
+        bool isCountEqual = rawContent.numberOfSettings == SettingsCount;
+        bool areHashesHashEqual = rawContent.settingsHashesHash == settingsHashesHash;
+
+        if (!isCountEqual)
+        {
+            // number of settings has been resized
         }
 
         // copy temporary settings to persistent instance
@@ -68,7 +72,7 @@ public:
     virtual void saveSettings()
     {
         rawContent.magicString = Signature;
-        rawContent.settingsNamesHash = settingsNamesHash;
+        rawContent.settingsHashesHash = settingsHashesHash;
 
         // copy persistent settings to temporary instance
         for (const auto &settingEntry : settings.getAllSettings())
@@ -89,17 +93,20 @@ public:
         // but putting packed for the whole struct generates a warning
         // as optimisations to SettingsContainer may change its size
         // interfering with packing
-        __attribute__((packed)) uint64_t settingsNamesHash = 0;
+        __attribute__((packed)) uint16_t numberOfSettings = SettingsCount;
+        __attribute__((packed)) uint64_t settingsHashesHash = 0;
         __attribute__((packed)) uint64_t settingsValuesHash = 0;
         __attribute__((packed)) size_t magicString = Signature;
         SettingsContainer<SettingsCount, entryArray> settingsContainer;
 
         bool operator==(const EepromContent &other) const
         {
-            return settingsNamesHash == other.settingsNamesHash &&
+            return numberOfSettings == other.numberOfSettings &&
+                   settingsHashesHash == other.settingsHashesHash &&
                    settingsValuesHash == other.settingsValuesHash &&
                    magicString == other.magicString && settingsContainer == other.settingsContainer;
         }
+
         bool operator!=(const EepromContent &other) const
         {
             return !((*this) == other);
@@ -124,7 +131,9 @@ private:
     SettingsContainer<SettingsCount, entryArray> &settings;
     EepromContent rawContent;
 
-    [[nodiscard]] static uint64_t hashSettingsNames()
+    /// every setting has his own hash
+    /// this function hashs over all setting hashes
+    [[nodiscard]] static uint64_t hashSettingsHashes()
     {
         uint64_t hash = core::hash::HASH_SEED;
         for (const auto &settingEntry : entryArray)
@@ -136,7 +145,7 @@ private:
         return hash;
     }
 
-    const uint64_t settingsNamesHash = hashSettingsNames();
+    const uint64_t settingsHashesHash = hashSettingsHashes();
 };
 
 } // namespace settings
