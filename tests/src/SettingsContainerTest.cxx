@@ -193,3 +193,37 @@ TEST_F(SettingsContainerTest, getMin_Default_MaxValue)
     ASSERT_EQ(settingsContainer.getMaxValue(entry2Index), Entry2_max);
     ASSERT_EQ(settingsContainer.getMaxValue(entry3Index), Entry3_max);
 }
+
+TEST_F(SettingsContainerTest, addToValue)
+{
+    EXPECT_TRUE(settingsContainer.addToValue(Entry1, 2));
+    EXPECT_TRUE(settingsContainer.addToValue(Entry2, 10));
+    EXPECT_TRUE(settingsContainer.addToValue(Entry3, 50));
+    EXPECT_TRUE(settingsContainer.addToValue(EntryInteger, 42));
+
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry1), Entry1_default + 2);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry2), Entry2_default + 10);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry3), Entry3_default + 50);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(EntryInteger), EntryInteger_default + 42);
+
+    EXPECT_TRUE(settingsContainer.addToValue(Entry1, -2));
+    EXPECT_TRUE(settingsContainer.addToValue(Entry2, -10));
+    EXPECT_TRUE(settingsContainer.addToValue(Entry3, -50));
+    EXPECT_TRUE(settingsContainer.addToValue(EntryInteger, -42));
+
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry1), Entry1_default);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry2), Entry2_default);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(Entry3), Entry3_default);
+    EXPECT_FLOAT_EQ(settingsContainer.getValue(EntryInteger), EntryInteger_default);
+
+    EXPECT_FALSE(settingsContainer.addToValue(Entry1, 91));
+    EXPECT_FALSE(settingsContainer.addToValue(Entry2, 181));
+    EXPECT_FALSE(settingsContainer.addToValue(Entry3, 271));
+    EXPECT_FALSE(settingsContainer.addToValue(EntryInteger, 0xFFBD));
+
+    EXPECT_FALSE(settingsContainer.addToValue(Entry1, Entry1_max - Entry1_min - 1));
+    EXPECT_FALSE(settingsContainer.addToValue(Entry2, Entry2_max - Entry2_min - 1));
+    EXPECT_FALSE(settingsContainer.addToValue(Entry3, Entry3_max - Entry3_min - 1));
+    EXPECT_FALSE(
+        settingsContainer.addToValue(EntryInteger, EntryInteger_max - EntryInteger_min - 1));
+}
