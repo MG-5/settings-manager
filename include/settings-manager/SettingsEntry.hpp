@@ -12,9 +12,7 @@ enum class VariableType
     booleanType,
 };
 
-/**
- * A single settings entry. Static content.
- */
+/// A single settings entry. Static content.
 class SettingsEntry
 {
 public:

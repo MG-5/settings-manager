@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0048 NEW)
 
-project(parameter_manager LANGUAGES CXX C ASM)
+project(settings-manager LANGUAGES CXX C ASM)
 
 add_library(${PROJECT_NAME} INTERFACE)
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 target_include_directories(${PROJECT_NAME} INTERFACE
         include)
-target_link_libraries(${PROJECT_NAME} INTERFACE core i2c-drivers bus_node_base)
+target_link_libraries(${PROJECT_NAME} INTERFACE core eeprom-drivers)
 
 if (${CMAKE_TESTING_ENABLED})
     find_package(PkgConfig)
@@ -15,13 +15,12 @@ if (${CMAKE_TESTING_ENABLED})
     pkg_search_module(GMOCK REQUIRED gmock)
 
     add_executable(${PROJECT_NAME}_test
-            tests/src/FakeMemoryTest.cxx
+            tests/src/FakeEepromTest.cxx
             tests/src/main.cxx
             tests/src/SettingsContainerTest.cxx
             tests/src/SettingsEntryTest.cxx
             tests/src/SettingsIOTest.cxx
             tests/src/SettingsUserTest.cxx
-            tests/src/ParameterManagerTest.cxx
             )
     target_compile_features(${PROJECT_NAME}_test PUBLIC cxx_std_17)
     target_include_directories(${PROJECT_NAME}_test PRIVATE
@@ -31,7 +30,7 @@ if (${CMAKE_TESTING_ENABLED})
             ${GTEST_LDFLAGS}
             ${GMOCK_LDFLAGS}
             core
-            i2c-drivers
+            eeprom-drivers
             gcov
             ${PROJECT_NAME})
 

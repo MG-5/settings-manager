@@ -1,4 +1,4 @@
-#include "parameter_manager/SettingsEntry.hpp"
+#include "settings-manager/SettingsEntry.hpp"
 #include <gtest/gtest.h>
 
 using namespace settings;
@@ -6,11 +6,11 @@ using namespace settings;
 class SettingsEntryTest : public ::testing::Test
 {
 protected:
-    static constexpr std::string_view Name1 =  "testEntry";
-    static constexpr std::string_view Name2 =  "otherEntry";
+    static constexpr std::string_view Name1 = "testEntry";
+    static constexpr std::string_view Name2 = "otherEntry";
 
     SettingsEntryTest()
-        : entry(0, 1, 2, Name1), //
+        : entry(0, 1, 2, Name1),                      //
           entry_otherValues_sameName(1, 2, 3, Name1), //
           entry_otherName_sameValues(0, 1, 2, Name2)
     {

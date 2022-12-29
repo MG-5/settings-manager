@@ -1,7 +1,8 @@
 #pragma once
 
-#include "parameter_manager/ParameterManager.hpp"
-#include "parameter_manager/SettingsContainer.hpp"
+#include "fake/FakeEeprom.hpp"
+#include "settings-manager/SettingsContainer.hpp"
+#include "settings-manager/SettingsIO.hpp"
 
 namespace TestSettings
 {
@@ -39,6 +40,5 @@ constexpr std::array EntryArray = {
                             settings::VariableType::integerType},
 };
 using Container = settings::SettingsContainer<EntryArray.size(), EntryArray>;
-using IO = settings::SettingsIO<EntryArray.size(), EntryArray>;
-using ParameterManager = settings::ParameterManager<EntryArray.size(), EntryArray>;
+using IO = settings::SettingsIO<EntryArray.size(), EntryArray, FakeEeprom>;
 } // namespace TestSettings

@@ -1,18 +1,22 @@
 #pragma once
+
+#include "core/SafeAssert.h"
+#include "eeprom-drivers/EepromBase.hpp"
+#include <array>
 #include <cstdint>
 #include <cstring>
-#include <i2c-drivers/24lcxx.hpp>
 
-class FakeEeprom24LC64 : public Eeprom24LC64
+using AddressSize = uint16_t;
+
+class FakeEeprom : public EepromBase<64, AddressSize>
 {
 public:
-    explicit FakeEeprom24LC64(i2c::IBusAccessor& accessor) : Eeprom24LC64(accessor, 0),
-          fakeMemory{0}
+    explicit FakeEeprom()
     {
         fakeMemory.fill(0xFF);
     }
 
-    void read(Address_t address, uint8_t *buffer, Address_t length) override
+    void read(AddressSize address, uint8_t *buffer, size_t length) override
     {
         SafeAssert(length != 0);
         SafeAssert(length - 1 <= std::numeric_limits<uint16_t>::max());
@@ -21,7 +25,7 @@ public:
         std::memcpy(buffer, fakeMemory.data() + address, length);
     }
 
-    void write(Address_t address, const uint8_t *data, Address_t length) override
+    void write(AddressSize address, const uint8_t *data, size_t length) override
     {
         SafeAssert(length != 0);
         SafeAssert(length - 1 <= std::numeric_limits<uint16_t>::max());

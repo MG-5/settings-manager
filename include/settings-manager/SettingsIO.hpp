@@ -1,34 +1,31 @@
 #pragma once
 
-#include "parameter_manager/SettingsContainer.hpp"
+#include "settings-manager/SettingsContainer.hpp"
+
 #include <core/hash.hpp>
-#include <i2c-drivers/24lcxx.hpp>
+#include <eeprom-drivers/EepromBase.hpp>
 
 namespace settings
 {
 
-/**
- * Handles saving non-static settings content to eeprom
- *
- * @tparam SettingsCount
- * @tparam entryArray
- */
-template <size_t SettingsCount, const std::array<SettingsEntry, SettingsCount> &entryArray>
+/// Handles saving non-static settings content to eeprom
+/// @tparam SettingsCount
+/// @tparam entryArray
+template <size_t SettingsCount, const std::array<SettingsEntry, SettingsCount> &entryArray,
+          class MemoryType>
 class SettingsIO
 {
 public:
-    SettingsIO(Eeprom24LC64 &eeprom, SettingsContainer<SettingsCount, entryArray> &settings)
+    SettingsIO(MemoryType &eeprom, SettingsContainer<SettingsCount, entryArray> &settings)
         : eeprom(eeprom),    //
           settings(settings) //
     {
     }
     virtual ~SettingsIO() = default;
 
-    /**
-     * Loads settings from EEPROM. Blocking. Updates SettingsContainer with read values on success.
-     * Discards EEPROM content and writes defaults on failure.
-     * @return true on success, false otherwise
-     */
+    /// Loads settings from EEPROM. Blocking. Updates SettingsContainer with read values on success.
+    /// Discards EEPROM content and writes defaults on failure.
+    /// @return true on success, false otherwise
     virtual bool loadSettings()
     {
         eeprom.read(MemoryOffset, reinterpret_cast<uint8_t *>(&rawContent), sizeof(EepromContent));
@@ -67,9 +64,7 @@ public:
         return true;
     }
 
-    /**
-     * Writes settings to EEPROM. Blocking
-     */
+    /// Writes settings to EEPROM. Blocking
     virtual void saveSettings()
     {
         rawContent.magicString = Signature;
@@ -99,13 +94,14 @@ public:
         __attribute__((packed)) size_t magicString = Signature;
         SettingsContainer<SettingsCount, entryArray> settingsContainer;
 
-        bool operator==(const EepromContent& other) const {
+        bool operator==(const EepromContent &other) const
+        {
             return settingsNamesHash == other.settingsNamesHash &&
                    settingsValuesHash == other.settingsValuesHash &&
-                   magicString == other.magicString &&
-                   settingsContainer == other.settingsContainer;
+                   magicString == other.magicString && settingsContainer == other.settingsContainer;
         }
-        bool operator!=(const EepromContent& other) const {
+        bool operator!=(const EepromContent &other) const
+        {
             return !((*this) == other);
         }
     };
@@ -124,7 +120,7 @@ public:
     }
 
 private:
-    Eeprom24LC64 &eeprom;
+    MemoryType &eeprom;
     SettingsContainer<SettingsCount, entryArray> &settings;
     EepromContent rawContent;
 
