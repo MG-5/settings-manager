@@ -3,7 +3,7 @@
 #include "settings-manager/SettingsContainer.hpp"
 
 #include <core/hash.hpp>
-#include <eeprom-drivers/EepromBase.hpp>
+#include <eeprom-driver/EepromBase.hpp>
 
 namespace settings
 {

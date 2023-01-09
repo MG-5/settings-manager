@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/SafeAssert.h"
-#include "eeprom-drivers/EepromBase.hpp"
+#include "eeprom-driver/EepromBase.hpp"
 #include <array>
 #include <cstdint>
 #include <cstring>
