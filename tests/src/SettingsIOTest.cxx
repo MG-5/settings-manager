@@ -28,13 +28,11 @@ protected:
     using OffsetEntry_t = std::pair<uint64_t, uint64_t>;
     void loadEepromContentOffsets();
 
-    OffsetEntry_t NamesHashOffset;
     OffsetEntry_t ValuesHashOffset;
     OffsetEntry_t MagicStringOffset;
-    OffsetEntry_t SettingsContainerOffset;
     // keep size in line with number of OffsetEntry_t above, too big array will fail asserts in
     // loadEepromContentOffsets
-    std::array<OffsetEntry_t, 4> allOffsets;
+    std::array<OffsetEntry_t, 2> allOffsets;
 };
 
 void SettingsIOTest::loadEepromContentOffsets()
@@ -46,42 +44,15 @@ void SettingsIOTest::loadEepromContentOffsets()
         sizeof(IO::EepromContent *) <= sizeof(Offset_t),
         "your architecture has a higher pointer length, increase uint64_t everywhere here");
 
-    NamesHashOffset = std::pair(reinterpret_cast<Offset_t>(&temporaryContent.settingsNamesHash) -
-                                    reinterpret_cast<Offset_t>(&temporaryContent),
-                                0);
     ValuesHashOffset = std::pair(reinterpret_cast<Offset_t>(&temporaryContent.settingsValuesHash) -
                                      reinterpret_cast<Offset_t>(&temporaryContent),
-                                 0);
+                                 sizeof(temporaryContent.settingsValuesHash));
+
     MagicStringOffset = std::pair(reinterpret_cast<Offset_t>(&temporaryContent.magicString) -
                                       reinterpret_cast<Offset_t>(&temporaryContent),
-                                  0);
-    SettingsContainerOffset =
-        std::pair(reinterpret_cast<Offset_t>(&temporaryContent.settingsContainer) -
-                      reinterpret_cast<Offset_t>(&temporaryContent),
-                  0);
-    allOffsets = {NamesHashOffset, ValuesHashOffset, MagicStringOffset, SettingsContainerOffset};
+                                  sizeof(temporaryContent.magicString));
 
-    // not the same offsets, offsets sorted ascending
-    Offset_t accumulatedSize = 0;
-    for (int i = 0; i < allOffsets.size() - 1; ++i)
-    {
-        ASSERT_LT(allOffsets[i], allOffsets[i + 1]);
-        allOffsets[0].second = allOffsets[i + 1].first - allOffsets[i].first;
-        accumulatedSize += allOffsets[0].second;
-    }
-
-    // not outside of struct
-    for (auto &trgt : allOffsets)
-    {
-        ASSERT_LT(trgt.first, sizeof(IO::EepromContent));
-        ASSERT_LT(trgt.second, sizeof(IO::EepromContent));
-    }
-    allOffsets[allOffsets.size() - 1].second =
-        sizeof(IO::EepromContent) - allOffsets[allOffsets.size() - 1].first;
-
-    // every member of struct is targeted, assuming settingsContainer is last
-    ASSERT_EQ(accumulatedSize + sizeof(IO::EepromContent::settingsContainer),
-              sizeof(IO::EepromContent));
+    allOffsets = {ValuesHashOffset, MagicStringOffset};
 }
 
 TEST_F(SettingsIOTest, initFromEmptyEeprom)
@@ -89,7 +60,7 @@ TEST_F(SettingsIOTest, initFromEmptyEeprom)
     // eeprom is filled with 0xFF fresh out of the package,
     // ensure a default settings initialisation and write back of
     // default values
-    settingsIo.loadSettings();
+    ASSERT_FALSE(settingsIo.loadSettings());
     eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
                 sizeof(IO::EepromContent));
     ASSERT_EQ(temporaryContent.settingsContainer, settingsContainer);
@@ -196,7 +167,9 @@ TEST_F(SettingsIOTest, BoundsCheckFailOnLoad)
     auto rawData = reinterpret_cast<SettingsValue_t *>(&temporaryContent.settingsContainer);
     ASSERT_LT(temporaryContent.settingsContainer.getValue(TestSettings::Entry1),
               TestSettings::Entry1_max);
-    rawData[0] = TestSettings::Entry1_max + static_cast<SettingsValue_t>(1);
+
+    constexpr auto SkipHash = sizeof(uint64_t) / sizeof(SettingsValue_t);
+    rawData[0 + SkipHash] = TestSettings::Entry1_max + static_cast<SettingsValue_t>(1);
     ASSERT_GT(temporaryContent.settingsContainer.getValue(TestSettings::Entry1),
               TestSettings::Entry1_max);
     temporaryContent.settingsValuesHash =
@@ -211,4 +184,108 @@ TEST_F(SettingsIOTest, BoundsCheckFailOnLoad)
 
     // check if reset to default worked
     ASSERT_EQ(settingsContainer.getValue(TestSettings::Entry1), TestSettings::Entry1_default);
+}
+
+TEST_F(SettingsIOTest, HashesHashNotEqual)
+{
+    // init eeprom content, which fills it with default values and saves
+    ASSERT_FALSE(settingsIo.loadSettings());
+    eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                sizeof(IO::EepromContent));
+
+    temporaryContent.settingsContainer.setValue<TestSettings::Entry1>(TestSettings::Entry1_max - 5);
+    temporaryContent.settingsContainer.setValue<TestSettings::Entry2>(TestSettings::Entry2_max - 5);
+    temporaryContent.settingsContainer.setValue<TestSettings::Entry3>(TestSettings::Entry3_max - 5);
+    temporaryContent.settingsValuesHash =
+        IO::hashSettingsValues(temporaryContent.settingsContainer);
+
+    IO::EepromContent correctEeprom = temporaryContent;
+
+    // make hashes hash corrupt
+    temporaryContent.settingsHashesHash = 0;
+    eeprom.write(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                 sizeof(IO::EepromContent));
+
+    ASSERT_TRUE(settingsIo.loadSettings());
+
+    eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                sizeof(IO::EepromContent));
+    ASSERT_EQ(correctEeprom, temporaryContent);
+}
+
+TEST_F(SettingsIOTest, NumberOfSettingsGreater)
+{
+    // init eeprom content, which fills it with default values and saves
+    ASSERT_FALSE(settingsIo.loadSettings());
+    eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                sizeof(IO::EepromContent));
+
+    temporaryContent.settingsContainer.setValue<TestSettings::Entry1>(TestSettings::Entry1_max - 5);
+    temporaryContent.settingsContainer.setValue<TestSettings::Entry2>(TestSettings::Entry2_max - 5);
+    temporaryContent.settingsContainer.setValue<TestSettings::Entry3>(TestSettings::Entry3_max - 5);
+    temporaryContent.settingsValuesHash =
+        IO::hashSettingsValues(temporaryContent.settingsContainer);
+
+    IO::EepromContent correctEeprom = temporaryContent;
+
+    temporaryContent.numberOfSettings = 3;
+
+    eeprom.write(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                 sizeof(IO::EepromContent));
+
+    ASSERT_TRUE(settingsIo.loadSettings());
+
+    eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                sizeof(IO::EepromContent));
+
+    ASSERT_EQ(correctEeprom, temporaryContent);
+}
+
+TEST_F(SettingsIOTest, NumberOfSettingsSmaller)
+{
+    // init eeprom content, which fills it with default values and saves
+    ASSERT_FALSE(settingsIo.loadSettings());
+    eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                sizeof(IO::EepromContent));
+
+    temporaryContent.settingsContainer.setValue<TestSettings::Entry1>(TestSettings::Entry1_max - 5);
+    temporaryContent.settingsContainer.setValue<TestSettings::Entry2>(TestSettings::Entry2_max - 5);
+    temporaryContent.settingsContainer.setValue<TestSettings::Entry3>(TestSettings::Entry3_max - 5);
+    temporaryContent.settingsValuesHash =
+        IO::hashSettingsValues(temporaryContent.settingsContainer);
+
+    IO::EepromContent correctEeprom = temporaryContent;
+
+    temporaryContent.numberOfSettings = 8;
+    uint64_t entry1Hash = temporaryContent.settingsContainer.getContainerArray()[0].hash;
+    uint64_t entry2Hash = temporaryContent.settingsContainer.getContainerArray()[1].hash;
+    uint64_t entry3Hash = temporaryContent.settingsContainer.getContainerArray()[2].hash;
+
+    temporaryContent.settingsContainer.getContainerArray()[0].hash = 0x42;
+    temporaryContent.settingsContainer.getContainerArray()[1].hash = 0x42;
+    temporaryContent.settingsContainer.getContainerArray()[2].hash = 0x42;
+    temporaryContent.settingsContainer.getContainerArray()[0].value = 0x42;
+    temporaryContent.settingsContainer.getContainerArray()[1].value = 0x42;
+    temporaryContent.settingsContainer.getContainerArray()[2].value = 0x42;
+
+    std::array<Container::memoryEntry, 3> additionalData;
+    additionalData[0].hash = entry3Hash;
+    additionalData[0].value = TestSettings::Entry3_max - 5;
+    additionalData[1].hash = entry1Hash;
+    additionalData[1].value = TestSettings::Entry1_max - 5;
+    additionalData[2].hash = entry2Hash;
+    additionalData[2].value = TestSettings::Entry2_max - 5;
+
+    eeprom.write(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                 sizeof(IO::EepromContent));
+    eeprom.write(IO::MemoryOffset + sizeof(IO::EepromContent),
+                 reinterpret_cast<uint8_t *>(additionalData.data()),
+                 additionalData.size() * sizeof(Container::memoryEntry));
+
+    ASSERT_TRUE(settingsIo.loadSettings());
+
+    eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                sizeof(IO::EepromContent));
+
+    ASSERT_EQ(correctEeprom, temporaryContent);
 }

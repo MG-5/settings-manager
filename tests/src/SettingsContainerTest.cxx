@@ -2,6 +2,8 @@
 #include <exception>
 #include <gtest/gtest.h>
 
+#include "core/hash.hpp"
+
 using namespace settings;
 using namespace TestSettings;
 
@@ -226,4 +228,32 @@ TEST_F(SettingsContainerTest, addToValue)
     EXPECT_FALSE(settingsContainer.addToValue(Entry3, Entry3_max - Entry3_min - 1));
     EXPECT_FALSE(
         settingsContainer.addToValue(EntryInteger, EntryInteger_max - EntryInteger_min - 1));
+}
+
+TEST_F(SettingsContainerTest, getIndexFromHash)
+{
+    constexpr auto HashEntry1 = core::hash::fnvStringview(Entry1);
+    constexpr auto HashEntry2 = core::hash::fnvStringview(Entry2);
+    constexpr auto HashEntry3 = core::hash::fnvStringview(Entry3);
+
+    constexpr std::string_view UnknownName = "[[[unknownName]]]";
+    constexpr auto HashUnknownName = core::hash::fnvStringview(UnknownName);
+
+    EXPECT_TRUE(settingsContainer.getIndexFromHash(HashEntry1).value_or(100) == 0);
+    EXPECT_TRUE(settingsContainer.getIndexFromHash(HashEntry2).value_or(100) == 1);
+    EXPECT_TRUE(settingsContainer.getIndexFromHash(HashEntry3).value_or(100) == 2);
+    EXPECT_FALSE(settingsContainer.getIndexFromHash(HashUnknownName));
+}
+
+TEST_F(SettingsContainerTest, equalOperator)
+{
+    TestSettings::Container settingsContainer2{};
+
+    EXPECT_TRUE(settingsContainer == settingsContainer2);
+    EXPECT_FALSE(settingsContainer != settingsContainer2);
+
+    settingsContainer2.setValue(Entry3, Entry3_min);
+
+    EXPECT_FALSE(settingsContainer == settingsContainer2);
+    EXPECT_TRUE(settingsContainer != settingsContainer2);
 }

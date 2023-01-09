@@ -1,6 +1,9 @@
 #pragma once
 #include "settings-manager/SettingsEntry.hpp"
 #include <core/SafeAssert.h>
+
+#include <cstring>
+#include <optional>
 #include <tuple>
 
 namespace settings
@@ -44,7 +47,7 @@ public:
     [[nodiscard]] T getValue(size_t index) const
     {
         SafeAssert(index < SettingsCount);
-        const auto value = containerArray[index].second;
+        const auto value = containerArray[index].value;
         if constexpr (std::is_same<T, SettingsValue_t>::value)
         {
             return value;
@@ -104,7 +107,7 @@ public:
         {
             return false;
         }
-        containerArray[Index].second = newValue;
+        containerArray[Index].value = newValue;
         return true;
     }
 
@@ -177,7 +180,8 @@ public:
     {
         for (size_t i = 0; i < SettingsCount; ++i)
         {
-            containerArray[i].second = entryArray[i].defaultValue;
+            containerArray[i].hash = entryArray[i].NameHash;
+            containerArray[i].value = entryArray[i].defaultValue;
         }
     }
 
@@ -194,7 +198,8 @@ public:
 
     bool operator==(const SettingsContainer<SettingsCount, entryArray> &other) const
     {
-        return containerArray == other.containerArray;
+        return std::memcmp(containerArray.data(), other.containerArray.data(),
+                           containerArray.size() * sizeof(memoryEntry)) == 0;
     }
 
     bool operator!=(const SettingsContainer<SettingsCount, entryArray> &other) const
@@ -202,8 +207,27 @@ public:
         return !((*this) == other);
     }
 
+    std::optional<size_t> getIndexFromHash(const uint64_t &hash)
+    {
+        for (size_t i = 0; i < SettingsCount; i++)
+            if (containerArray[i].hash == hash)
+                return std::optional{i};
+
+        return std::nullopt;
+    }
+
+    struct memoryEntry
+    {
+        __attribute__((packed)) uint64_t hash = 0;
+        __attribute__((packed)) SettingsValue_t value = 0;
+    };
+
+    [[nodiscard]] std::array<memoryEntry, SettingsCount> &getContainerArray()
+    {
+        return containerArray;
+    }
+
 private:
-    using memoryEntry = std::pair<uint64_t, uint32_t>;
     std::array<memoryEntry, SettingsCount> containerArray{};
 
     [[nodiscard]] static constexpr std::tuple<bool, size_t>
@@ -229,7 +253,7 @@ private:
                 {
                     continue;
                 }
-                if (i.hasSameName(j.name))
+                if (i.hasSameName(j.name) || i.hasSameHash(j.NameHash))
                 {
                     return true;
                 }

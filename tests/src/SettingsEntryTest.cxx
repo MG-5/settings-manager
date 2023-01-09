@@ -59,3 +59,9 @@ TEST_F(SettingsEntryTest, SameName)
     EXPECT_TRUE(entry.hasSameName(entry_otherValues_sameName.name));
     EXPECT_FALSE(entry.hasSameName(entry_otherName_sameValues.name));
 }
+
+TEST_F(SettingsEntryTest, SameHash)
+{
+    EXPECT_TRUE(entry.hasSameHash(entry_otherValues_sameName.NameHash));
+    EXPECT_FALSE(entry.hasSameHash(entry_otherName_sameValues.NameHash));
+}
