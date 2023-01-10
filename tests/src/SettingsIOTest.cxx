@@ -183,6 +183,10 @@ TEST_F(SettingsIOTest, BoundsCheckFailOnLoad)
 
     // check if reset to default worked
     ASSERT_EQ(settingsContainer.getValue(TestSettings::Entry1), TestSettings::Entry1_default);
+
+    eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                sizeof(IO::EepromContent));
+    ASSERT_EQ(settingsContainer, temporaryContent.settingsContainer);
 }
 
 TEST_F(SettingsIOTest, HashesHashNotEqual)
@@ -209,6 +213,7 @@ TEST_F(SettingsIOTest, HashesHashNotEqual)
     eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
                 sizeof(IO::EepromContent));
     ASSERT_EQ(correctEeprom, temporaryContent);
+    ASSERT_EQ(settingsContainer, temporaryContent.settingsContainer);
 }
 
 TEST_F(SettingsIOTest, HashesHashFlipEntries)
@@ -246,6 +251,7 @@ TEST_F(SettingsIOTest, HashesHashFlipEntries)
     eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
                 sizeof(IO::EepromContent));
     ASSERT_EQ(correctEeprom, temporaryContent);
+    ASSERT_EQ(settingsContainer, temporaryContent.settingsContainer);
 }
 
 TEST_F(SettingsIOTest, NumberOfSettingsGreater)
@@ -273,6 +279,7 @@ TEST_F(SettingsIOTest, NumberOfSettingsGreater)
                 sizeof(IO::EepromContent));
 
     ASSERT_EQ(correctEeprom, temporaryContent);
+    ASSERT_EQ(settingsContainer, temporaryContent.settingsContainer);
 }
 
 TEST_F(SettingsIOTest, NumberOfSettingsSmaller)
