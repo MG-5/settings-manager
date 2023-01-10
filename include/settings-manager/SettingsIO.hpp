@@ -231,7 +231,14 @@ private:
                     // hash found - rescue old value
                     std::optional<size_t> index = settings.getIndexFromHash(entry.hash);
                     SafeAssert(index.has_value());
-                    settings.setValue(index.value(), pointerToContent[i].value);
+
+                    if (!settings.setValue(index.value(), pointerToContent[i].value))
+                    {
+                        // read settings value is out of range, reset to default
+                        const auto DefaultValue =
+                            settings.getAllSettings()[index.value()].defaultValue;
+                        settings.setValue(index.value(), DefaultValue);
+                    }
                     break;
                 }
             }
