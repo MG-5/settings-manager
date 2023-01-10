@@ -49,7 +49,7 @@ public:
         bool isCountEqual = rawContent.numberOfSettings == SettingsCount;
         bool areHashesHashEqual = rawContent.settingsHashesHash == settingsHashesHash;
         bool areValuesValid =
-            rawContent.settingsValuesHash == hashSettingsValues(rawContent.settingsContainer);
+            rawContent.settingsValuesHash == hashValues(rawContent.settingsContainer);
         bool saveRequired = false;
 
         if (!isCountEqual)
@@ -135,7 +135,7 @@ public:
             SafeAssert(rawContent.settingsContainer.setValue(settingsArray[i].name, Value));
         }
 
-        rawContent.settingsValuesHash = hashSettingsValues(rawContent.settingsContainer);
+        rawContent.settingsValuesHash = hashValues(rawContent.settingsContainer);
 
         eeprom.write(MemoryOffset, reinterpret_cast<uint8_t *>(&rawContent), sizeof(EepromContent));
     }
@@ -169,7 +169,7 @@ public:
     };
 
     [[nodiscard]] static uint64_t
-    hashSettingsValues(SettingsContainer<SettingsCount, entryArray> &container)
+    hashValues(SettingsContainer<SettingsCount, entryArray> &container)
     {
         uint64_t hash = core::hash::HASH_SEED;
         for (const auto &settingEntry : container.getAllSettings())
@@ -184,7 +184,7 @@ public:
     /// every setting has his own hash
     /// this function hashs over all setting hashes
     [[nodiscard]] static uint64_t
-    hashSettingsHashes(SettingsContainer<SettingsCount, entryArray> &container)
+    hashHashes(SettingsContainer<SettingsCount, entryArray> &container)
     {
         uint64_t hash = core::hash::HASH_SEED;
         for (const auto &settingEntry : container.getContainerArray())
@@ -201,7 +201,7 @@ private:
     SettingsContainer<SettingsCount, entryArray> &settings;
     EepromContent rawContent;
 
-    const uint64_t settingsHashesHash{hashSettingsHashes(settings)};
+    const uint64_t settingsHashesHash{hashHashes(settings)};
 
     void migrateSettings(std::unique_ptr<memoryEntry[]> oldEepromAdditionalContent = nullptr,
                          size_t length = 0)

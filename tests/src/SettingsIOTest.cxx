@@ -172,8 +172,7 @@ TEST_F(SettingsIOTest, BoundsCheckFailOnLoad)
     rawData[0 + SkipHash] = TestSettings::Entry1_max + static_cast<SettingsValue_t>(1);
     ASSERT_GT(temporaryContent.settingsContainer.getValue(TestSettings::Entry1),
               TestSettings::Entry1_max);
-    temporaryContent.settingsValuesHash =
-        IO::hashSettingsValues(temporaryContent.settingsContainer);
+    temporaryContent.settingsValuesHash = IO::hashValues(temporaryContent.settingsContainer);
 
     // write back to eeprom
     eeprom.write(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
@@ -196,8 +195,7 @@ TEST_F(SettingsIOTest, HashesHashNotEqual)
     temporaryContent.settingsContainer.setValue<TestSettings::Entry1>(TestSettings::Entry1_max - 5);
     temporaryContent.settingsContainer.setValue<TestSettings::Entry2>(TestSettings::Entry2_max - 5);
     temporaryContent.settingsContainer.setValue<TestSettings::Entry3>(TestSettings::Entry3_max - 5);
-    temporaryContent.settingsValuesHash =
-        IO::hashSettingsValues(temporaryContent.settingsContainer);
+    temporaryContent.settingsValuesHash = IO::hashValues(temporaryContent.settingsContainer);
 
     IO::EepromContent correctEeprom = temporaryContent;
 
@@ -221,10 +219,8 @@ TEST_F(SettingsIOTest, HashesHashFlipEntries)
 
     temporaryContent.settingsContainer.setValue<TestSettings::Entry1>(TestSettings::Entry1_max - 5);
     temporaryContent.settingsContainer.setValue<TestSettings::Entry2>(TestSettings::Entry2_min + 5);
-    temporaryContent.settingsValuesHash =
-        IO::hashSettingsValues(temporaryContent.settingsContainer);
-    temporaryContent.settingsHashesHash =
-        IO::hashSettingsHashes(temporaryContent.settingsContainer);
+    temporaryContent.settingsValuesHash = IO::hashValues(temporaryContent.settingsContainer);
+    temporaryContent.settingsHashesHash = IO::hashHashes(temporaryContent.settingsContainer);
 
     IO::EepromContent correctEeprom = temporaryContent;
 
@@ -239,10 +235,8 @@ TEST_F(SettingsIOTest, HashesHashFlipEntries)
     temporaryContent.settingsContainer.getContainerArray()[0].value = entry2Value;
     temporaryContent.settingsContainer.getContainerArray()[1].value = entry1Value;
 
-    temporaryContent.settingsValuesHash =
-        IO::hashSettingsValues(temporaryContent.settingsContainer);
-    temporaryContent.settingsHashesHash =
-        IO::hashSettingsHashes(temporaryContent.settingsContainer);
+    temporaryContent.settingsValuesHash = IO::hashValues(temporaryContent.settingsContainer);
+    temporaryContent.settingsHashesHash = IO::hashHashes(temporaryContent.settingsContainer);
 
     eeprom.write(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
                  sizeof(IO::EepromContent));
@@ -264,8 +258,7 @@ TEST_F(SettingsIOTest, NumberOfSettingsGreater)
     temporaryContent.settingsContainer.setValue<TestSettings::Entry1>(TestSettings::Entry1_max - 5);
     temporaryContent.settingsContainer.setValue<TestSettings::Entry2>(TestSettings::Entry2_max - 5);
     temporaryContent.settingsContainer.setValue<TestSettings::Entry3>(TestSettings::Entry3_max - 5);
-    temporaryContent.settingsValuesHash =
-        IO::hashSettingsValues(temporaryContent.settingsContainer);
+    temporaryContent.settingsValuesHash = IO::hashValues(temporaryContent.settingsContainer);
 
     IO::EepromContent correctEeprom = temporaryContent;
 
@@ -292,8 +285,7 @@ TEST_F(SettingsIOTest, NumberOfSettingsSmaller)
     temporaryContent.settingsContainer.setValue<TestSettings::Entry1>(TestSettings::Entry1_max - 5);
     temporaryContent.settingsContainer.setValue<TestSettings::Entry2>(TestSettings::Entry2_max - 5);
     temporaryContent.settingsContainer.setValue<TestSettings::Entry3>(TestSettings::Entry3_max - 5);
-    temporaryContent.settingsValuesHash =
-        IO::hashSettingsValues(temporaryContent.settingsContainer);
+    temporaryContent.settingsValuesHash = IO::hashValues(temporaryContent.settingsContainer);
 
     IO::EepromContent correctEeprom = temporaryContent;
 
