@@ -328,4 +328,63 @@ TEST_F(SettingsIOTest, NumberOfSettingsSmaller)
                 sizeof(IO::EepromContent));
 
     ASSERT_EQ(correctEeprom, temporaryContent);
+    ASSERT_EQ(settingsContainer, temporaryContent.settingsContainer);
+}
+
+TEST_F(SettingsIOTest, BoundsCheckFailAfterHashesWasChanged)
+{
+    // init eeprom content, which fills it with default values and saves
+    ASSERT_FALSE(settingsIo.loadSettings());
+    eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                sizeof(IO::EepromContent));
+
+    IO::EepromContent correctEeprom = temporaryContent;
+
+    // bounds check fails when eeprom content is loaded after
+    // min / max of one or more SettingsEntries was changed
+    // so that the freshly loaded value doesn't fit anymore
+    // before that we flip two entries and recalculate hash
+    // to test migration is worked correctly on value which violates the bounds
+
+    // change to a valid value and write back - this should whether the value is resetted later
+    temporaryContent.settingsContainer.setValue<TestSettings::Entry1>(TestSettings::Entry1_max);
+    temporaryContent.settingsValuesHash = IO::hashValues(temporaryContent.settingsContainer);
+    IO::EepromContent changedEeprom = temporaryContent;
+    eeprom.write(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                 sizeof(IO::EepromContent));
+    ASSERT_TRUE(settingsIo.loadSettings());
+
+    // flip two entries and recalculate hash
+    uint64_t entry1Hash = temporaryContent.settingsContainer.getContainerArray()[0].hash;
+    uint64_t entry2Hash = temporaryContent.settingsContainer.getContainerArray()[1].hash;
+    uint64_t entry1Value =
+        TestSettings::Entry1_max + static_cast<SettingsValue_t>(1); // add one to Maximum
+    uint64_t entry2Value = temporaryContent.settingsContainer.getContainerArray()[1].value;
+
+    temporaryContent.settingsContainer.getContainerArray()[0].hash = entry2Hash;
+    temporaryContent.settingsContainer.getContainerArray()[1].hash = entry1Hash;
+    temporaryContent.settingsContainer.getContainerArray()[0].value = entry2Value;
+    temporaryContent.settingsContainer.getContainerArray()[1].value = entry1Value;
+
+    temporaryContent.settingsValuesHash = IO::hashValues(temporaryContent.settingsContainer);
+    temporaryContent.settingsHashesHash = IO::hashHashes(temporaryContent.settingsContainer);
+
+    // write back to eeprom
+    eeprom.write(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                 sizeof(IO::EepromContent));
+
+    // load without reset
+    ASSERT_TRUE(settingsIo.loadSettings());
+
+    // check if reset to default worked
+    ASSERT_EQ(settingsContainer.getValue(TestSettings::Entry1), TestSettings::Entry1_default);
+
+    eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                sizeof(IO::EepromContent));
+
+    // change (previous valid) should be resetted
+    ASSERT_NE(temporaryContent, changedEeprom);
+
+    ASSERT_EQ(correctEeprom, temporaryContent);
+    ASSERT_EQ(settingsContainer, temporaryContent.settingsContainer);
 }
