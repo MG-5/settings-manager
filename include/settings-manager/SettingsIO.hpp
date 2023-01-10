@@ -80,7 +80,7 @@ public:
             else
                 migrateSettings();
         }
-        else if (!areHashesHashEqual && areValuesValid)
+        else if (!areHashesHashEqual)
         {
             // something changed in the hashes, that can be the order of settings
             // or one or more setting was replace by another one resp.
@@ -181,26 +181,27 @@ public:
         return hash;
     }
 
+    /// every setting has his own hash
+    /// this function hashs over all setting hashes
+    [[nodiscard]] static uint64_t
+    hashSettingsHashes(SettingsContainer<SettingsCount, entryArray> &container)
+    {
+        uint64_t hash = core::hash::HASH_SEED;
+        for (const auto &settingEntry : container.getContainerArray())
+        {
+            hash = core::hash::fnvWithSeed(
+                hash, reinterpret_cast<const uint8_t *>(&settingEntry.hash),
+                reinterpret_cast<const uint8_t *>(&settingEntry.hash) + sizeof(settingEntry.hash));
+        }
+        return hash;
+    }
+
 private:
     MemoryType &eeprom;
     SettingsContainer<SettingsCount, entryArray> &settings;
     EepromContent rawContent;
 
-    /// every setting has his own hash
-    /// this function hashs over all setting hashes
-    [[nodiscard]] static uint64_t hashSettingsHashes()
-    {
-        uint64_t hash = core::hash::HASH_SEED;
-        for (const auto &settingEntry : entryArray)
-        {
-            hash = core::hash::fnvWithSeed(
-                hash, reinterpret_cast<const uint8_t *>(&settingEntry.NameHash),
-                reinterpret_cast<const uint8_t *>(&settingEntry.NameHash) + sizeof(uint64_t));
-        }
-        return hash;
-    }
-
-    const uint64_t settingsHashesHash = hashSettingsHashes();
+    const uint64_t settingsHashesHash{hashSettingsHashes(settings)};
 
     void migrateSettings(std::unique_ptr<memoryEntry[]> oldEepromAdditionalContent = nullptr,
                          size_t length = 0)

@@ -213,6 +213,47 @@ TEST_F(SettingsIOTest, HashesHashNotEqual)
     ASSERT_EQ(correctEeprom, temporaryContent);
 }
 
+TEST_F(SettingsIOTest, HashesHashFlipEntries)
+{
+    ASSERT_FALSE(settingsIo.loadSettings());
+    eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                sizeof(IO::EepromContent));
+
+    temporaryContent.settingsContainer.setValue<TestSettings::Entry1>(TestSettings::Entry1_max - 5);
+    temporaryContent.settingsContainer.setValue<TestSettings::Entry2>(TestSettings::Entry2_min + 5);
+    temporaryContent.settingsValuesHash =
+        IO::hashSettingsValues(temporaryContent.settingsContainer);
+    temporaryContent.settingsHashesHash =
+        IO::hashSettingsHashes(temporaryContent.settingsContainer);
+
+    IO::EepromContent correctEeprom = temporaryContent;
+
+    // flip two entries and recalculate hash
+    uint64_t entry1Hash = temporaryContent.settingsContainer.getContainerArray()[0].hash;
+    uint64_t entry2Hash = temporaryContent.settingsContainer.getContainerArray()[1].hash;
+    uint64_t entry1Value = temporaryContent.settingsContainer.getContainerArray()[0].value;
+    uint64_t entry2Value = temporaryContent.settingsContainer.getContainerArray()[1].value;
+
+    temporaryContent.settingsContainer.getContainerArray()[0].hash = entry2Hash;
+    temporaryContent.settingsContainer.getContainerArray()[1].hash = entry1Hash;
+    temporaryContent.settingsContainer.getContainerArray()[0].value = entry2Value;
+    temporaryContent.settingsContainer.getContainerArray()[1].value = entry1Value;
+
+    temporaryContent.settingsValuesHash =
+        IO::hashSettingsValues(temporaryContent.settingsContainer);
+    temporaryContent.settingsHashesHash =
+        IO::hashSettingsHashes(temporaryContent.settingsContainer);
+
+    eeprom.write(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                 sizeof(IO::EepromContent));
+
+    ASSERT_TRUE(settingsIo.loadSettings());
+
+    eeprom.read(IO::MemoryOffset, reinterpret_cast<uint8_t *>(&temporaryContent),
+                sizeof(IO::EepromContent));
+    ASSERT_EQ(correctEeprom, temporaryContent);
+}
+
 TEST_F(SettingsIOTest, NumberOfSettingsGreater)
 {
     // init eeprom content, which fills it with default values and saves
